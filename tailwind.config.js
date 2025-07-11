@@ -56,6 +56,6 @@ export default {
     },
   },
   plugins: [
-    require("tailwindcss-animate"), // deja esta línea solo si instalaste el paquete
+    
   ],
 };
