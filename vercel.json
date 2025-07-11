@@ -1,0 +1,7 @@
+{
+  "rootDirectory": "finanzas-app",
+  "build": {
+    "command": "npm run build",
+    "outputDirectory": "dist"
+  }
+}
