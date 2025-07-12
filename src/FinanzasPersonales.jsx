@@ -151,7 +151,7 @@ export default function FinanzasPersonales() {
 
   /*********************** Render ***************************/
   return (
-    <div className="max-w-md mx-auto p-4 space-y-6 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+    <div className="bg-background dark:bg-gray-800">
       {/* Top Bar */}
       <div className="flex items-center gap-2">
         <Card className="flex-1">
@@ -184,7 +184,7 @@ export default function FinanzasPersonales() {
       {/* Ingresos */}
       <Card>
         <CardContent className="p-4 space-y-2">
-          <h2 className="font-semibold text-lg">Ingresos</h2>
+          <h2 className="text-brand-500 font-semibold">Ingresos</h2>
           {Object.entries(ingresos).map(([k, v]) => (
             <div key={k} className="grid grid-cols-4 gap-2 items-center text-xs">
               <Input
