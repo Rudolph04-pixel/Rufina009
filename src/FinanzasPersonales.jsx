@@ -151,7 +151,7 @@ export default function FinanzasPersonales() {
 
   /*********************** Render ***************************/
   return (
-    <div className="bg-background dark:bg-gray-800">
+    <div className="min-h-screen bg-brand-100">
       {/* Top Bar */}
       <div className="flex items-center gap-2">
         <Card className="flex-1">
