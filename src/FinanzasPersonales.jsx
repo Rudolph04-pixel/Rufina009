@@ -67,6 +67,7 @@ export default function FinanzasPersonales() {
     "Gastos comunes": { presupuesto: 129570, real: "" },
     Luz: { presupuesto: 21193, real: "" },
     Agua: { presupuesto: 9810, real: "" },
+    Bidon_Agua: { presupuesto: 2500, real: "" },
     Gas: { presupuesto: 19170, real: "" },
     Celular: { presupuesto: 16990, real: "" },
     Internet: { presupuesto: 11187, real: "" },
