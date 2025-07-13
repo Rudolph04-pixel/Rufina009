@@ -77,7 +77,6 @@ export default function FinanzasPersonales() {
     Abu: { presupuesto: 30000, real: "" },
     Itau: { presupuesto: 10120, real: "" },
     Jardinero: { presupuesto: 10000, real: "" },
-    TAG: { presupuesto: 24830, real: "" }
   });
 
   const [noGuiltSpend, setNoGuiltSpend] = useState({});
