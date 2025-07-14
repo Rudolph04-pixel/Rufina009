@@ -18,7 +18,7 @@ const months = [
 const LS_KEY = "finanzas-personales-v1";
 
 const createBlobLink = (content, filename) => {
-  const blob = new Blob([content], { type:"text/csv;charset=utf-8;" });
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href = url; a.download = filename;
@@ -39,7 +39,7 @@ export default function FinanzasPersonales() {
   const [selectedMonth,setSelectedMonth] = useState(String(today.getMonth()));
   const [selectedYear ,setSelectedYear ] = useState(String(today.getFullYear()));
 
-  /* Estado */
+  /* ----------------- Estado ----------------- */
   const [ingresos,setIngresos] = useState({
     A:{valor:"",tipo:"fijo"},
     B:{valor:"",tipo:"fijo"},
@@ -89,11 +89,11 @@ export default function FinanzasPersonales() {
     "TAG (Peajes)":{presupuesto:25000,realFijo:"",realVariable:""}
   });
 
-  /* Persistencia */
+  /* ------------- Persistencia ------------- */
   useEffect(()=>{
-    try {
+    try{
       const d = JSON.parse(localStorage.getItem(LS_KEY));
-      if (!d) return;
+      if(!d) return;
       d.ingresos        && setIngresos(d.ingresos);
       d.gastosFijos     && setGastosFijos(d.gastosFijos);
       d.noGuiltSpend    && setNoGuiltSpend(d.noGuiltSpend);
@@ -102,7 +102,7 @@ export default function FinanzasPersonales() {
       d.gastosVariables && setGastosVariables(d.gastosVariables);
       d.selectedMonth   && setSelectedMonth(d.selectedMonth);
       d.selectedYear    && setSelectedYear(d.selectedYear);
-    } catch {}
+    }catch{}
   },[]);
 
   useEffect(()=>{
@@ -117,41 +117,31 @@ export default function FinanzasPersonales() {
     selectedMonth,selectedYear
   ]);
 
-  /* Cálculos */
+  /* ------------- Cálculos ------------- */
   const sumSingle = o => Object.values(o).reduce((s,x)=>s+Number(x.real||0),0);
-  const sumDual   = o => Object.values(o).reduce(
-    (s,x)=>s+Number(x.realFijo||0)+Number(x.realVariable||0),0
-  );
+  const sumDual   = o => Object.values(o).reduce((s,x)=>s+Number(x.realFijo||0)+Number(x.realVariable||0),0);
 
-  const totalIngresosNominal = Object.values(ingresos)
-    .reduce((s,i)=>s+Number(i.valor||0),0);
-  const totalFixedIngresos = Object.values(ingresos)
-    .reduce((s,i)=>i.tipo==="fijo"?s+Number(i.valor||0):s,0);
+  const totalIngresosNominal   = Object.values(ingresos).reduce((s,i)=>s+Number(i.valor||0),0);
+  const totalFixedIngresos     = Object.values(ingresos).reduce((s,i)=>i.tipo==="fijo"?s+Number(i.valor||0):s,0);
+  // **total de ingresos variables**:
+  const totalIngresosVariables = Object.values(ingresos)
+    .reduce((s,i)=>i.tipo==="variable"?s+Number(i.valor||0):s,0);
 
   const totalGastosFijos = sumSingle(gastosFijos);
-  const totalNoGuilt    = Object.values(noGuiltSpend)
-    .reduce((s,v)=>s+Number(v||0),0);
+  const totalNoGuilt    = Object.values(noGuiltSpend).reduce((s,v)=>s+Number(v||0),0);
 
-  /* **Ahora definimos estos dos** */
-  const totalInvFijo = Object.values(inversion)
-    .reduce((s,x)=>s+Number(x.realFijo||0),0);
-  const totalInvVar  = Object.values(inversion)
-    .reduce((s,x)=>s+Number(x.realVariable||0),0);
+  const totalInvFijo = Object.values(inversion).reduce((s,x)=>s+Number(x.realFijo||0),0);
+  const totalInvVar  = Object.values(inversion).reduce((s,x)=>s+Number(x.realVariable||0),0);
 
-  const totalAhrFijo = Object.values(ahorro)
-    .reduce((s,x)=>s+Number(x.realFijo||0),0);
-  const totalAhrVar  = Object.values(ahorro)
-    .reduce((s,x)=>s+Number(x.realVariable||0),0);
+  const totalAhrFijo = Object.values(ahorro).reduce((s,x)=>s+Number(x.realFijo||0),0);
+  const totalAhrVar  = Object.values(ahorro).reduce((s,x)=>s+Number(x.realVariable||0),0);
 
-  const totalGVarFijo = Object.values(gastosVariables)
-    .reduce((s,x)=>s+Number(x.realFijo||0),0);
-  const totalGVarVar  = Object.values(gastosVariables)
-    .reduce((s,x)=>s+Number(x.realVariable||0),0);
+  const totalGVarFijo = Object.values(gastosVariables).reduce((s,x)=>s+Number(x.realFijo||0),0);
+  const totalGVarVar  = Object.values(gastosVariables).reduce((s,x)=>s+Number(x.realVariable||0),0);
 
-  /* Totales con variable+fijo */
-  const totalInversion  = totalInvFijo + totalInvVar;
-  const totalAhorro     = totalAhrFijo + totalAhrVar;
-  const totalGastosVars = totalGVarFijo + totalGVarVar;
+  const totalInversion   = totalInvFijo + totalInvVar;
+  const totalAhorro      = totalAhrFijo + totalAhrVar;
+  const totalGastosVars  = totalGVarFijo + totalGVarVar;
 
   const totalGastos = totalGastosFijos
     + totalNoGuilt
@@ -159,19 +149,26 @@ export default function FinanzasPersonales() {
     + totalAhorro
     + totalGastosVars;
 
-  const percent = v => totalFixedIngresos
-    ? ((v/totalFixedIngresos)*100).toFixed(1)
-    : "0.0";
+  const percent = v =>
+    totalFixedIngresos
+      ? ((v/totalFixedIngresos)*100).toFixed(1)
+      : "0.0";
+
+  // % respecto a tus ingresos **variables**
+  const percentVar = v =>
+    totalIngresosVariables
+      ? ((v/totalIngresosVariables)*100).toFixed(1)
+      : "0.0";
 
   const restante = totalFixedIngresos - totalGastos;
 
-  /* Handlers */
-  const handleIngresoChange      = (k,f,v) => setIngresos(p=>({...p,[k]:{...p[k],[f]:v}}));
-  const handleGastoFijoRealChange= (k,v) => setGastosFijos(p=>({...p,[k]:{...p[k],real:v}}));
-  const handleNoGuiltChange      = (k,v) => setNoGuiltSpend(p=>({...p,[k]:v}));
+  /* ------------- Handlers ------------- */
+  const handleIngresoChange       = (k,f,v) => setIngresos(p=>({...p,[k]:{...p[k],[f]:v}}));
+  const handleGastoFijoRealChange = (k,v) => setGastosFijos(p=>({...p,[k]:{...p[k],real:v}}));
+  const handleNoGuiltChange       = (k,v) => setNoGuiltSpend(p=>({...p,[k]:v}));
 
-  const dualHandler = setter => (k,f,v) =>
-    setter(p=>({...p,[k]:{...p[k],[f]:v}}));
+  const dualHandler = setter => (k,field,v) =>
+    setter(p=>({...p,[k]:{...p[k],[field]:v}}));
   const handleInvChange  = dualHandler(setInversion);
   const handleAhorChange = dualHandler(setAhorro);
   const handleVarChange  = dualHandler(setGastosVariables);
@@ -181,23 +178,20 @@ export default function FinanzasPersonales() {
     [`${label} ${Object.keys(p).length+1}`]:{presupuesto:0,realFijo:"",realVariable:""}
   }));
   const deleteKey = (setter,k) => setter(p=>{
-    const {[k]:_,...rest} = p;
-    return rest;
+    const {[k]:_,...rest}=p; return rest;
   });
 
-  /* Export CSV */
-  const exportCSV=()=>{
+  /* ------------- Export CSV ------------- */
+  const exportCSV = () => {
     const rows=[["Cat","Item","Pres","RFijo","%RF","RVar","%RV","Mes","Año"]];
-    const pushSingle = (cat,obj)=>
-      Object.entries(obj).forEach(([k,x])=>{
-        const rf = Number(x.real||0);
-        rows.push([cat,k,x.presupuesto,rf,percent(rf),"-","-",months[selectedMonth],selectedYear]);
-      });
-    const pushDual = (cat,obj)=>
-      Object.entries(obj).forEach(([k,x])=>{
-        const rf=Number(x.realFijo||0), rv=Number(x.realVariable||0);
-        rows.push([cat,k,x.presupuesto,rf,percent(rf),rv,percent(rv),months[selectedMonth],selectedYear]);
-      });
+    const pushSingle = (cat,obj)=>Object.entries(obj).forEach(([k,x])=>{
+      const rf=Number(x.real||0);
+      rows.push([cat,k,x.presupuesto,rf,percent(rf),"-","-",months[selectedMonth],selectedYear]);
+    });
+    const pushDual = (cat,obj)=>Object.entries(obj).forEach(([k,x])=>{
+      const rf=Number(x.realFijo||0), rv=Number(x.realVariable||0);
+      rows.push([cat,k,x.presupuesto,rf,percent(rf),rv,percentVar(rv),months[selectedMonth],selectedYear]);
+    });
 
     pushSingle("Gastos Fijos",gastosFijos);
     Object.entries(noGuiltSpend).forEach(([k,v])=>{
@@ -213,9 +207,10 @@ export default function FinanzasPersonales() {
     );
   };
 
-  /* Render */
+  /* ───────────── Render ───────────── */
   return (
     <div className="min-h-screen bg-brand-100 p-4 space-y-4">
+
       {/* Top Bar */}
       <div className="flex items-center gap-2">
         <Card className="flex-1">
@@ -270,6 +265,9 @@ export default function FinanzasPersonales() {
           <p className="font-bold text-sm">
             Ingresos totales: ${totalIngresosNominal.toLocaleString()}
           </p>
+          <p className="text-xs text-gray-600">
+            (De esto ${totalIngresosVariables.toLocaleString()} son variables)
+          </p>
         </CardContent>
       </Card>
 
@@ -305,14 +303,20 @@ export default function FinanzasPersonales() {
             <div key={k} className="grid grid-cols-5 gap-2 items-center text-xs">
               <Input defaultValue={k} placeholder="Item"
                      onBlur={e=>{
-                       const newKey=e.target.value.trim();
-                       if(!newKey||newKey===k)return;
+                       const nk=e.target.value.trim();
+                       if(!nk||nk===k) return;
                        setNoGuiltSpend(p=>{
-                         const obj={...p}; const val=obj[k]; delete obj[k]; obj[newKey]=val; return obj;
+                         const o={...p}, val=o[k];
+                         delete o[k]; o[nk]=val;
+                         return o;
                        });
-                     }}/>
-              <Input type="number" value={v} placeholder="Monto"
-                     onChange={e=>handleNoGuiltChange(k,e.target.value)}/>
+                     }} />
+              <Input
+                type="number"
+                value={v}
+                placeholder="Monto"
+                onChange={e=>handleNoGuiltChange(k,e.target.value)}
+              />
               <Button size="icon" variant="ghost" onClick={()=>deleteKey(setNoGuiltSpend,k)}>🗑</Button>
               <span className="text-right text-gray-500">{percent(Number(v||0))}%</span>
             </div>
@@ -354,7 +358,7 @@ export default function FinanzasPersonales() {
                     type="number" value={x.realVariable} placeholder="0"
                     onChange={e=>handler(k,"realVariable",e.target.value)}
                   />
-                  <span>{percent(rv)}%</span>
+                  <span>{percentVar(rv)}%</span>
                   <Button size="icon" variant="ghost" onClick={()=>deleteKey(setter,k)}>🗑</Button>
                 </div>
               );
@@ -370,26 +374,32 @@ export default function FinanzasPersonales() {
       <Card>
         <CardContent className="space-y-1 text-sm">
           <p><strong>Ingresos fijos (100%):</strong> ${totalFixedIngresos.toLocaleString()}</p>
+          <p><strong>Ingresos variables:</strong> ${totalIngresosVariables.toLocaleString()}</p>
+
           <p>Gastos Fijos: ${totalGastosFijos.toLocaleString()} ({percent(totalGastosFijos)}%)</p>
           <p>No Guilt Spend: ${totalNoGuilt.toLocaleString()} ({percent(totalNoGuilt)}%)</p>
-          <p>Inversión (fijo): ${totalInvFijo.toLocaleString()} ({percent(totalInvFijo)}%)</p>
-          <p>Inversión (variable): ${totalInvVar.toLocaleString()} ({percent(totalInvVar)}%)</p>
-          <p>Ahorro (fijo): ${totalAhrFijo.toLocaleString()} ({percent(totalAhrFijo)}%)</p>
-          <p>Ahorro (variable): ${totalAhrVar.toLocaleString()} ({percent(totalAhrVar)}%)</p>
-          <p>Variables (fijo): ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)</p>
-          <p>Variables (variable): ${totalGVarVar.toLocaleString()} ({percent(totalGVarVar)}%)</p>
+
+          <p>Inversión fijo: ${totalInvFijo.toLocaleString()} ({percent(totalInvFijo)}%)</p>
+          <p>Inversión var: ${totalInvVar.toLocaleString()} ({percentVar(totalInvVar)}%)</p>
+
+          <p>Ahorro fijo: ${totalAhrFijo.toLocaleString()} ({percent(totalAhrFijo)}%)</p>
+          <p>Ahorro var: ${totalAhrVar.toLocaleString()} ({percentVar(totalAhrVar)}%)</p>
+
+          <p>Variables fijo: ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)</p>
+          <p>Variables var: ${totalGVarVar.toLocaleString()} ({percentVar(totalGVarVar)}%)</p>
+
           <p className={`font-bold ${restante<0?"text-red-600":"text-green-600"}`}>
             Disponible: ${restante.toLocaleString()} ({percent(restante)}%)
           </p>
           <p className="font-bold pt-2">
             Balance: ${(totalIngresosNominal - totalGastos).toLocaleString()}
           </p>
+
           <Button className="mt-2 w-full" onClick={exportCSV}>
             Exportar CSV
           </Button>
         </CardContent>
       </Card>
-
     </div>
   );
 }
