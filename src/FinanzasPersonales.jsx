@@ -75,7 +75,7 @@ export default function FinanzasPersonales() {
     "Seguro Salud banco chile": { presupuesto: 17612, real: "" },
     "Seguros hogar Quillota": { presupuesto: 5100, real: "" },
     "Seguro auto": { presupuesto: 56000, real: "" },
-    "Patrimore ": { presupuesto: 47000, real: "" },
+    "Patrimore": { presupuesto: 47000, real: "" },
     Abu: { presupuesto: 30000, real: "" },
     Itau: { presupuesto: 10120, real: "" },
     Jardinero: { presupuesto: 10000, real: "" }
