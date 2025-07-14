@@ -31,15 +31,17 @@ const createBlobLink = (content, filename) => {
 /* ───────────── Component ───────────── */
 export default function FinanzasPersonales() {
   /* Tema oscuro */
-  const [darkMode,setDarkMode] = useState(false);
-  useEffect(()=>{ document.documentElement.classList.toggle("dark",darkMode); },[darkMode]);
+  const [darkMode,setDarkMode]=useState(false);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
 
   /* Periodo */
   const today = new Date();
   const [selectedMonth,setSelectedMonth] = useState(String(today.getMonth()));
   const [selectedYear ,setSelectedYear ] = useState(String(today.getFullYear()));
 
-  /* ----------------- Estado ----------------- */
+  /* ───── Estado ───── */
   const [ingresos,setIngresos] = useState({
     A:{valor:"",tipo:"fijo"},
     B:{valor:"",tipo:"fijo"},
@@ -47,7 +49,6 @@ export default function FinanzasPersonales() {
     D:{valor:"",tipo:"fijo"},
     E:{valor:"",tipo:"fijo"}
   });
-
   const [gastosFijos,setGastosFijos] = useState({
     Hipoteca:{presupuesto:694631,real:""},
     "Gastos comunes":{presupuesto:129570,real:""},
@@ -65,16 +66,13 @@ export default function FinanzasPersonales() {
     Itau:{presupuesto:10120,real:""},
     Jardinero:{presupuesto:10000,real:""}
   });
-
   const [noGuiltSpend,setNoGuiltSpend] = useState({});
-
   const [inversion,setInversion] = useState({
     "VECTOR CAPITAL-Patrimore":{presupuesto:200000,realFijo:"",realVariable:""},
     "APV -MBI A Y B mes intercalado":{presupuesto:100000,realFijo:"",realVariable:""},
     "Gastos no cubiertos DEPTO EC":{presupuesto:200000,realFijo:"",realVariable:""},
     "Gastos no cubiertos DEPTO LC":{presupuesto:100000,realFijo:"",realVariable:""}
   });
-
   const [ahorro,setAhorro] = useState({
     "Vacaciones FINTUAL":{presupuesto:100000,realFijo:"",realVariable:""},
     Abu:{presupuesto:15000,realFijo:"",realVariable:""},
@@ -82,14 +80,13 @@ export default function FinanzasPersonales() {
     "Contribuciones propiedades":{presupuesto:103200,realFijo:"",realVariable:""},
     "Permiso circulacion & mantenciones auto":{presupuesto:26000,realFijo:"",realVariable:""}
   });
-
   const [gastosVariables,setGastosVariables] = useState({
     "Alimentación & hogar":{presupuesto:120000,realFijo:"",realVariable:""},
     Transporte:{presupuesto:80000,realFijo:"",realVariable:""},
     "TAG (Peajes)":{presupuesto:25000,realFijo:"",realVariable:""}
   });
 
-  /* ------------- Persistencia ------------- */
+  /* ───── Persistencia ───── */
   useEffect(()=>{
     try{
       const d = JSON.parse(localStorage.getItem(LS_KEY));
@@ -104,7 +101,6 @@ export default function FinanzasPersonales() {
       d.selectedYear    && setSelectedYear(d.selectedYear);
     }catch{}
   },[]);
-
   useEffect(()=>{
     localStorage.setItem(LS_KEY,JSON.stringify({
       ingresos,gastosFijos,noGuiltSpend,
@@ -117,15 +113,14 @@ export default function FinanzasPersonales() {
     selectedMonth,selectedYear
   ]);
 
-  /* ------------- Cálculos ------------- */
+  /* ───── Cálculos ───── */
   const sumSingle = o => Object.values(o).reduce((s,x)=>s+Number(x.real||0),0);
-  const sumDual   = o => Object.values(o).reduce((s,x)=>s+Number(x.realFijo||0)+Number(x.realVariable||0),0);
+  const sumDual   = o => Object.values(o)
+    .reduce((s,x)=>s+Number(x.realFijo||0)+Number(x.realVariable||0),0);
 
   const totalIngresosNominal   = Object.values(ingresos).reduce((s,i)=>s+Number(i.valor||0),0);
   const totalFixedIngresos     = Object.values(ingresos).reduce((s,i)=>i.tipo==="fijo"?s+Number(i.valor||0):s,0);
-  // **total de ingresos variables**:
-  const totalIngresosVariables = Object.values(ingresos)
-    .reduce((s,i)=>i.tipo==="variable"?s+Number(i.valor||0):s,0);
+  const totalIngresosVariables = Object.values(ingresos).reduce((s,i)=>i.tipo==="variable"?s+Number(i.valor||0):s,0);
 
   const totalGastosFijos = sumSingle(gastosFijos);
   const totalNoGuilt    = Object.values(noGuiltSpend).reduce((s,v)=>s+Number(v||0),0);
@@ -139,9 +134,9 @@ export default function FinanzasPersonales() {
   const totalGVarFijo = Object.values(gastosVariables).reduce((s,x)=>s+Number(x.realFijo||0),0);
   const totalGVarVar  = Object.values(gastosVariables).reduce((s,x)=>s+Number(x.realVariable||0),0);
 
-  const totalInversion   = totalInvFijo + totalInvVar;
-  const totalAhorro      = totalAhrFijo + totalAhrVar;
-  const totalGastosVars  = totalGVarFijo + totalGVarVar;
+  const totalInversion  = totalInvFijo + totalInvVar;
+  const totalAhorro     = totalAhrFijo + totalAhrVar;
+  const totalGastosVars = totalGVarFijo + totalGVarVar;
 
   const totalGastos = totalGastosFijos
     + totalNoGuilt
@@ -149,26 +144,20 @@ export default function FinanzasPersonales() {
     + totalAhorro
     + totalGastosVars;
 
-  const percent = v =>
-    totalFixedIngresos
-      ? ((v/totalFixedIngresos)*100).toFixed(1)
-      : "0.0";
+  const percent    = v => totalFixedIngresos ? ((v/totalFixedIngresos)*100).toFixed(1) : "0.0";
+  const percentVar = v => totalIngresosVariables ? ((v/totalIngresosVariables)*100).toFixed(1) : "0.0";
 
-  // % respecto a tus ingresos **variables**
-  const percentVar = v =>
-    totalIngresosVariables
-      ? ((v/totalIngresosVariables)*100).toFixed(1)
-      : "0.0";
+  // disponibles por tramo
+  const disponibleFijo = totalFixedIngresos
+    - ( totalGastosFijos + totalInvFijo + totalAhrFijo + totalGVarFijo );
+  const disponibleVar  = totalIngresosVariables
+    - ( totalInvVar + totalAhrVar + totalGVarVar );
 
-  const restante = totalFixedIngresos - totalGastos;
-
-  /* ------------- Handlers ------------- */
+  /* ───── Handlers ───── */
   const handleIngresoChange       = (k,f,v) => setIngresos(p=>({...p,[k]:{...p[k],[f]:v}}));
   const handleGastoFijoRealChange = (k,v) => setGastosFijos(p=>({...p,[k]:{...p[k],real:v}}));
   const handleNoGuiltChange       = (k,v) => setNoGuiltSpend(p=>({...p,[k]:v}));
-
-  const dualHandler = setter => (k,field,v) =>
-    setter(p=>({...p,[k]:{...p[k],[field]:v}}));
+  const dualHandler = setter => (k,f,v) => setter(p=>({...p,[k]:{...p[k],[f]:v}}));
   const handleInvChange  = dualHandler(setInversion);
   const handleAhorChange = dualHandler(setAhorro);
   const handleVarChange  = dualHandler(setGastosVariables);
@@ -181,7 +170,7 @@ export default function FinanzasPersonales() {
     const {[k]:_,...rest}=p; return rest;
   });
 
-  /* ------------- Export CSV ------------- */
+  /* ───── Export CSV ───── */
   const exportCSV = () => {
     const rows=[["Cat","Item","Pres","RFijo","%RF","RVar","%RV","Mes","Año"]];
     const pushSingle = (cat,obj)=>Object.entries(obj).forEach(([k,x])=>{
@@ -264,9 +253,7 @@ export default function FinanzasPersonales() {
           ))}
           <p className="font-bold text-sm">
             Ingresos totales: ${totalIngresosNominal.toLocaleString()}
-          </p>
-          <p className="text-xs text-gray-600">
-            (De esto ${totalIngresosVariables.toLocaleString()} son variables)
+            <span className="text-xs text-gray-600">  ({totalIngresosVariables.toLocaleString()} variables)</span>
           </p>
         </CardContent>
       </Card>
@@ -310,7 +297,8 @@ export default function FinanzasPersonales() {
                          delete o[k]; o[nk]=val;
                          return o;
                        });
-                     }} />
+                     }}
+              />
               <Input
                 type="number"
                 value={v}
@@ -332,43 +320,48 @@ export default function FinanzasPersonales() {
         {label:"Inversión",   data:inversion,   setter:setInversion,   handler:handleInvChange},
         {label:"Ahorro",      data:ahorro,      setter:setAhorro,      handler:handleAhorChange},
         {label:"Gasto variable", data:gastosVariables, setter:setGastosVariables, handler:handleVarChange}
-      ].map(({label,data,setter,handler})=>(
-        <Card key={label}>
-          <CardContent className="space-y-2">
-            <h2 className="font-semibold text-lg">
-              {label} — {percent(sumDual(data))}%
-            </h2>
-            <div className="grid grid-cols-7 gap-2 text-[11px] font-medium">
-              <span>Item</span><span>Pres</span>
-              <span>Real fijo</span><span>%RF</span>
-              <span>Real var</span><span>%RV</span><span/>
-            </div>
-            {Object.entries(data).map(([k,x])=>{
-              const rf=Number(x.realFijo||0), rv=Number(x.realVariable||0);
-              return (
-                <div key={k} className="grid grid-cols-7 gap-2 items-center text-xs">
-                  <span>{k}</span>
-                  <span>${x.presupuesto.toLocaleString()}</span>
-                  <Input
-                    type="number" value={x.realFijo} placeholder="0"
-                    onChange={e=>handler(k,"realFijo",e.target.value)}
-                  />
-                  <span>{percent(rf)}%</span>
-                  <Input
-                    type="number" value={x.realVariable} placeholder="0"
-                    onChange={e=>handler(k,"realVariable",e.target.value)}
-                  />
-                  <span>{percentVar(rv)}%</span>
-                  <Button size="icon" variant="ghost" onClick={()=>deleteKey(setter,k)}>🗑</Button>
-                </div>
-              );
-            })}
-            <Button size="sm" onClick={()=>addKey(setter,label)}>
-              Añadir {label.toLowerCase()}
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
+      ].map(({label,data,setter,handler})=>{
+        // cálculos locales para header
+        const fixedSum = Object.values(data).reduce((s,x)=>s+Number(x.realFijo||0),0);
+        const varSum   = Object.values(data).reduce((s,x)=>s+Number(x.realVariable||0),0);
+        return (
+          <Card key={label}>
+            <CardContent className="space-y-2">
+              <h2 className="font-semibold text-lg">
+                {label} — Fijo: {percent(fixedSum)}% | Variable: {percentVar(varSum)}%
+              </h2>
+              <div className="grid grid-cols-7 gap-2 text-[11px] font-medium">
+                <span>Item</span><span>Pres</span>
+                <span>Real fijo</span><span>%RF</span>
+                <span>Real var</span><span>%RV</span><span/>
+              </div>
+              {Object.entries(data).map(([k,x])=>{
+                const rf=Number(x.realFijo||0), rv=Number(x.realVariable||0);
+                return (
+                  <div key={k} className="grid grid-cols-7 gap-2 items-center text-xs">
+                    <span>{k}</span>
+                    <span>${x.presupuesto.toLocaleString()}</span>
+                    <Input
+                      type="number" value={x.realFijo} placeholder="0"
+                      onChange={e=>handler(k,"realFijo",e.target.value)}
+                    />
+                    <span>{percent(rf)}%</span>
+                    <Input
+                      type="number" value={x.realVariable} placeholder="0"
+                      onChange={e=>handler(k,"realVariable",e.target.value)}
+                    />
+                    <span>{percentVar(rv)}%</span>
+                    <Button size="icon" variant="ghost" onClick={()=>deleteKey(setter,k)}>🗑</Button>
+                  </div>
+                );
+              })}
+              <Button size="sm" onClick={()=>addKey(setter,label)}>
+                Añadir {label.toLowerCase()}
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      })}
 
       {/* Resumen & Export */}
       <Card>
@@ -388,11 +381,11 @@ export default function FinanzasPersonales() {
           <p>Variables fijo: ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)</p>
           <p>Variables var: ${totalGVarVar.toLocaleString()} ({percentVar(totalGVarVar)}%)</p>
 
-          <p className={`font-bold ${restante<0?"text-red-600":"text-green-600"}`}>
-            Disponible: ${restante.toLocaleString()} ({percent(restante)}%)
-          </p>
+          <p className="text-sm font-semibold">Disponible fijo: ${disponibleFijo.toLocaleString()} ({percent(disponibleFijo)}%)</p>
+          <p className="text-sm font-semibold">Disponible var:  ${disponibleVar.toLocaleString()} ({percentVar(disponibleVar)}%)</p>
+
           <p className="font-bold pt-2">
-            Balance: ${(totalIngresosNominal - totalGastos).toLocaleString()}
+            Balance (nominal): ${(totalIngresosNominal - totalGastos).toLocaleString()}
           </p>
 
           <Button className="mt-2 w-full" onClick={exportCSV}>
