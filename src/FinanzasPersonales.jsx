@@ -73,8 +73,8 @@ export default function FinanzasPersonales() {
     Internet: { presupuesto: 11187, real: "" },
     "Seguro médicos banco chile": { presupuesto: 17612, real: "" },
     "Seguros casa Quillota": { presupuesto: 5100, real: "" },
-    "Patrimore Scotia": { presupuesto: 47000, real: "" },
-    "Auto_mantenciones_permisos": { presupuesto: 81000, real: "" },
+    "Patrimore ": { presupuesto: 47000, real: "" },
+    "Seguro auto": { presupuesto: 56000, real: "" },
     Abu: { presupuesto: 30000, real: "" },
     Itau: { presupuesto: 10120, real: "" },
     Jardinero: { presupuesto: 10000, real: "" },
@@ -84,7 +84,7 @@ export default function FinanzasPersonales() {
 
   const [inversion, setInversion] = useState({
     "VECTOR CAPITAL-Patrimore": { presupuesto: 200000, real: "" },
-    "APV -MBI A Y B MES INTERCALADO": { presupuesto: 100000, real: "" },
+    "APV -MBI A Y B mes intercalado": { presupuesto: 100000, real: "" },
     "Gastos no cubiertos DEPTO EC": { presupuesto: 200000, real: "" },
     "Gastos no cubiertos DEPTO LC": { presupuesto: 100000, real: "" }
   });
@@ -92,8 +92,8 @@ export default function FinanzasPersonales() {
   const [ahorro, setAhorro] = useState({
     "Vacaciones FINTUAL": { presupuesto: 100000, real: "" },
     Abu: { presupuesto: 15000, real: "" },
-    "F.Imprevistos- patrimore ok": { presupuesto: 17000, real: "" },
-    "Contribuciones propiedades": { presupuesto: 0, real: "" },
+    "F.Tranquilidad- patrimore ": { presupuesto: 17000, real: "" },
+    "Contribuciones propiedades": { presupuesto: 103200, real: "" },
     "Permiso circulacion & mantenciones auto": { presupuesto: 26000, real: "" }
   });
 
@@ -570,40 +570,58 @@ export default function FinanzasPersonales() {
         </CardContent>
       </Card>
 
-      {/* Resumen & Export */}
-      <Card>
-        <CardContent className="p-4 space-y-1 text-sm">
-          <p>
-            <strong>Ingresos fijos (100%):</strong>{" "}
-            ${totalFixedIngresos.toLocaleString()}
-          </p>
-          <p>
-            Gastos Fijos: ${totalGastosFijos.toLocaleString()} (
-            {percent(totalGastosFijos)}%)
-          </p>
-          <p>
-            No Guilt Spend: ${totalNoGuilt.toLocaleString()} (
-            {percent(totalNoGuilt)}%)
-          </p>
-          <p>
-            Inversión: ${totalInversion.toLocaleString()} (
-            {percent(totalInversion)}%)
-          </p>
-          <p>
-            Ahorro: ${totalAhorro.toLocaleString()} ({percent(totalAhorro)}%)
-          </p>
-          <p>
-            Variables: ${totalGastosVariables.toLocaleString()} (
-            {percent(totalGastosVariables)}%)
-          </p>
-          <p className="font-bold pt-2">
-            Balance: ${(totalIngresos - totalGastos).toLocaleString()}
-          </p>
-          <Button className="mt-2 w-full" onClick={exportCSV}>
-            Exportar CSV
-          </Button>
-        </CardContent>
-      </Card>
+{/* Resumen & Export */}
+<Card>
+  <CardContent className="p-4 space-y-1 text-sm">
+    <p>
+      <strong>Ingresos fijos (100%):</strong>{" "}
+      ${totalFixedIngresos.toLocaleString()}
+    </p>
+
+    <p>
+      Gastos Fijos: ${totalGastosFijos.toLocaleString()} (
+      {percent(totalGastosFijos)}%)
+    </p>
+
+    <p>
+      No Guilt Spend: ${totalNoGuilt.toLocaleString()} (
+      {percent(totalNoGuilt)}%)
+    </p>
+
+    <p>
+      Inversión: ${totalInversion.toLocaleString()} (
+      {percent(totalInversion)}%)
+    </p>
+
+    <p>
+      Ahorro: ${totalAhorro.toLocaleString()} ({percent(totalAhorro)}%)
+    </p>
+
+    <p>
+      Variables: ${totalGastosVariables.toLocaleString()} (
+      {percent(totalGastosVariables)}%)
+    </p>
+
+    {/* Disponible / Restante */}
+    <p
+      className={`font-bold ${
+        restante < 0 ? "text-red-600" : "text-green-600"
+      }`}
+    >
+      Disponible: ${restante.toLocaleString()} ({percent(restante)}%)
+    </p>
+
+    {/* Balance general (ingresos totales – gastos totales) */}
+    <p className="font-bold pt-2">
+      Balance: ${(totalIngresos - totalGastos).toLocaleString()}
+    </p>
+
+    <Button className="mt-2 w-full" onClick={exportCSV}>
+      Exportar CSV
+    </Button>
+  </CardContent>
+</Card>
+
     </div>
   );
 }
