@@ -589,6 +589,6 @@ export default function FinanzasPersonales() {
         </Card>
 
      </div> {/* cierra max-w-lg mx-auto */}
-    </div>  {/* cierra min-h-screen */}
+    </div>  
   )
 }
