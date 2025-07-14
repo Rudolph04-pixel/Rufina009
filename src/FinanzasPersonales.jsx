@@ -18,7 +18,7 @@ const months = [
 const LS_KEY = "finanzas-personales-v1";
 
 const createBlobLink = (content, filename) => {
-  const blob = new Blob([content], { type:"text/csv;charset=utf-8;" });
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href = url; a.download = filename;
@@ -41,7 +41,7 @@ export default function FinanzasPersonales() {
   const [selectedMonth,setSelectedMonth] = useState(String(today.getMonth()));
   const [selectedYear ,setSelectedYear ] = useState(String(today.getFullYear()));
 
-  /* Estado */
+  /* ───── Estado ───── */
   const [ingresos,setIngresos] = useState({
     A:{valor:"",tipo:"fijo"},
     B:{valor:"",tipo:"fijo"},
@@ -49,13 +49,44 @@ export default function FinanzasPersonales() {
     D:{valor:"",tipo:"fijo"},
     E:{valor:"",tipo:"fijo"}
   });
-  const [gastosFijos,setGastosFijos] = useState({ /* ...igual que antes...*/ });
+  const [gastosFijos,setGastosFijos] = useState({
+    Hipoteca:{presupuesto:694631,real:""},
+    "Gastos comunes":{presupuesto:129570,real:""},
+    Luz:{presupuesto:21193,real:""},
+    Agua:{presupuesto:9810,real:""},
+    Bidon_Agua_x2:{presupuesto:5000,real:""},
+    Gas:{presupuesto:19170,real:""},
+    Celular:{presupuesto:16990,real:""},
+    Internet:{presupuesto:11187,real:""},
+    "Seguro Salud banco chile":{presupuesto:17612,real:""},
+    "Seguros hogar Quillota":{presupuesto:5100,real:""},
+    "Seguro auto":{presupuesto:56000,real:""},
+    Patrimore:{presupuesto:47000,real:""},
+    Abu:{presupuesto:30000,real:""},
+    Itau:{presupuesto:10120,real:""},
+    Jardinero:{presupuesto:10000,real:""}
+  });
   const [noGuiltSpend,setNoGuiltSpend] = useState({});
-  const [inversion,setInversion] = useState({ /* ...igual que antes...*/ });
-  const [ahorro,setAhorro] = useState({ /* ...igual que antes...*/ });
-  const [gastosVariables,setGastosVariables] = useState({ /* ...igual que antes...*/ });
+  const [inversion,setInversion] = useState({
+    "VECTOR CAPITAL-Patrimore":{presupuesto:200000,realFijo:"",realVariable:""},
+    "APV -MBI A Y B mes intercalado":{presupuesto:100000,realFijo:"",realVariable:""},
+    "Gastos no cubiertos DEPTO EC":{presupuesto:200000,realFijo:"",realVariable:""},
+    "Gastos no cubiertos DEPTO LC":{presupuesto:100000,realFijo:"",realVariable:""}
+  });
+  const [ahorro,setAhorro] = useState({
+    "Vacaciones FINTUAL":{presupuesto:100000,realFijo:"",realVariable:""},
+    Abu:{presupuesto:15000,realFijo:"",realVariable:""},
+    "F.Tranquilidad- patrimore ":{presupuesto:17000,realFijo:"",realVariable:""},
+    "Contribuciones propiedades":{presupuesto:103200,realFijo:"",realVariable:""},
+    "Permiso circulacion & mantenciones auto":{presupuesto:26000,realFijo:"",realVariable:""}
+  });
+  const [gastosVariables,setGastosVariables] = useState({
+    "Alimentación & hogar":{presupuesto:120000,realFijo:"",realVariable:""},
+    Transporte:{presupuesto:80000,realFijo:"",realVariable:""},
+    "TAG (Peajes)":{presupuesto:25000,realFijo:"",realVariable:""}
+  });
 
-  /* Persistencia */
+  /* ───── Persistencia ───── */
   useEffect(()=>{
     try{
       const d = JSON.parse(localStorage.getItem(LS_KEY));
@@ -82,7 +113,7 @@ export default function FinanzasPersonales() {
     selectedMonth,selectedYear
   ]);
 
-  /* Cálculos */
+  /* ───── Cálculos ───── */
   const sumSingle = o => Object.values(o).reduce((s,x)=>s+Number(x.real||0),0);
   const sumDual   = o => Object.values(o).reduce((s,x)=>s+Number(x.realFijo||0)+Number(x.realVariable||0),0);
 
@@ -115,7 +146,7 @@ export default function FinanzasPersonales() {
   const percent    = v => totalFixedIngresos ? ((v/totalFixedIngresos)*100).toFixed(1) : "0.0";
   const percentVar = v => totalIngresosVariables ? ((v/totalIngresosVariables)*100).toFixed(1) : "0.0";
 
-  // Pool restante de variables
+  // Pool restante para variables
   const totalAssignedVar = totalInvVar + totalAhrVar + totalGVarVar;
   const remainingVarPool = totalIngresosVariables - totalAssignedVar;
 
@@ -124,24 +155,38 @@ export default function FinanzasPersonales() {
     - ( totalGastosFijos + totalInvFijo + totalAhrFijo + totalGVarFijo );
   const disponibleVar  = remainingVarPool;
 
-  /* Handlers */
+  /* ───── Handlers ───── */
   const handleIngresoChange       = (k,f,v) => setIngresos(p=>({...p,[k]:{...p[k],[f]:v}}));
   const handleGastoFijoRealChange = (k,v) => setGastosFijos(p=>({...p,[k]:{...p[k],real:v}}));
   const handleNoGuiltChange       = (k,v) => setNoGuiltSpend(p=>({...p,[k]:v}));
 
-  const dualHandler = setter => (k,f,v) => {
-    // clamp to pool
+  const handleInvChange = (k,field,v) => {
     let num = Number(v)||0;
-    const current = Number(setter===setInversion?inversion[k].realVariable:
-                           setter===setAhorro   ?ahorro[k].realVariable:
-                           gastosVariables[k].realVariable);
-    const maxAllowed = current + remainingVarPool;
-    if(num > maxAllowed) num = maxAllowed;
-    setter(p=>({...p,[k]:{...p[k],[f]:String(num)}}));
+    if(field==="realVariable") {
+      const cur = Number(inversion[k].realVariable)||0;
+      const max = cur + remainingVarPool;
+      if(num>max) num = max;
+    }
+    setInversion(p=>({...p,[k]:{...p[k],[field]:String(num)}}));
   };
-  const handleInvChange  = dualHandler(setInversion);
-  const handleAhorChange = dualHandler(setAhorro);
-  const handleVarChange  = dualHandler(setGastosVariables);
+  const handleAhorChange = (k,field,v) => {
+    let num = Number(v)||0;
+    if(field==="realVariable") {
+      const cur = Number(ahorro[k].realVariable)||0;
+      const max = cur + remainingVarPool;
+      if(num>max) num = max;
+    }
+    setAhorro(p=>({...p,[k]:{...p[k],[field]:String(num)}}));
+  };
+  const handleVarChange = (k,field,v) => {
+    let num = Number(v)||0;
+    if(field==="realVariable") {
+      const cur = Number(gastosVariables[k].realVariable)||0;
+      const max = cur + remainingVarPool;
+      if(num>max) num = max;
+    }
+    setGastosVariables(p=>({...p,[k]:{...p[k],[field]:String(num)}}));
+  };
 
   const addKey = (setter,label) => setter(p=>({
     ...p,
@@ -151,7 +196,7 @@ export default function FinanzasPersonales() {
     const {[k]:_,...rest}=p; return rest;
   });
 
-  /* Export CSV */
+  /* ───── Export CSV ───── */
   const exportCSV = () => {
     const rows=[["Cat","Item","Pres","RFijo","%RF","RVar","%RV","Mes","Año"]];
     const pushSingle = (cat,obj)=>Object.entries(obj).forEach(([k,x])=>{
@@ -177,7 +222,7 @@ export default function FinanzasPersonales() {
     );
   };
 
-  /* Render */
+  /* ───────────── Render ───────────── */
   return (
     <div className="min-h-screen bg-brand-100 p-4 space-y-4">
 
@@ -234,20 +279,21 @@ export default function FinanzasPersonales() {
           ))}
           <p className="font-bold text-sm">
             Ingresos totales: ${totalIngresosNominal.toLocaleString()}
-            <span className="text-xs text-gray-600">  ({totalIngresosVariables.toLocaleString()} variables)</span>
+            <span className="text-xs text-gray-600">
+              {" "}({totalIngresosVariables.toLocaleString()} variables)
+            </span>
           </p>
         </CardContent>
       </Card>
 
-      {/* ... luego los bloques de Gastos Fijos, No Guilt, etc. igual que antes */}
+      {/* ... los bloques de Gastos Fijos y No Guilt Spend igual que antes ... */}
 
-      {/* Bloques Inversión / Ahorro / Gastos Variables */}
+      {/* Inversión / Ahorro / Gastos Variables */}
       {[
-        {label:"Inversión",   data:inversion,   setter:setInversion,   handler:handleInvChange},
-        {label:"Ahorro",      data:ahorro,      setter:setAhorro,      handler:handleAhorChange},
-        {label:"Gasto variable", data:gastosVariables, setter:setGastosVariables, handler:handleVarChange}
+        {label:"Inversión",     data:inversion,       setter:setInversion,   handler:handleInvChange},
+        {label:"Ahorro",        data:ahorro,          setter:setAhorro,      handler:handleAhorChange},
+        {label:"Gasto variable",data:gastosVariables, setter:setGastosVariables,handler:handleVarChange}
       ].map(({label,data,setter,handler})=>{
-        // cálculos de porcentajes para el título
         const fixedSum = Object.values(data).reduce((s,x)=>s+Number(x.realFijo||0),0);
         const varSum   = Object.values(data).reduce((s,x)=>s+Number(x.realVariable||0),0);
         return (
@@ -256,7 +302,6 @@ export default function FinanzasPersonales() {
               <h2 className="font-semibold text-lg">
                 {label} — Fijo: {percent(fixedSum)}% | Variable: {percentVar(varSum)}%
               </h2>
-              {/* columnas */}
               <div className="grid grid-cols-7 gap-2 text-[11px] font-medium">
                 <span>Item</span><span>Pres</span>
                 <span>Real fijo</span><span>%RF</span>
@@ -264,20 +309,20 @@ export default function FinanzasPersonales() {
               </div>
               {Object.entries(data).map(([k,x])=>{
                 const rf=Number(x.realFijo||0), rv=Number(x.realVariable||0);
-                const maxVar = rv + remainingVarPool;
                 return (
                   <div key={k} className="grid grid-cols-7 gap-2 items-center text-xs">
                     <span>{k}</span>
                     <span>${x.presupuesto.toLocaleString()}</span>
                     <Input
-                      type="number" value={x.realFijo}
+                      type="number"
+                      value={x.realFijo}
                       onChange={e=>handler(k,"realFijo",e.target.value)}
                     />
                     <span>{percent(rf)}%</span>
                     <Input
                       type="number"
                       value={x.realVariable}
-                      max={maxVar}
+                      max={rf + remainingVarPool} 
                       onChange={e=>handler(k,"realVariable",e.target.value)}
                     />
                     <span>{percentVar(rv)}%</span>
@@ -327,7 +372,6 @@ export default function FinanzasPersonales() {
           </Button>
         </CardContent>
       </Card>
-
     </div>
   );
 }
