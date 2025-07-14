@@ -120,7 +120,6 @@ export default function FinanzasPersonales() {
   const totalIngresosVariables = Object.values(ingresos).reduce((s,i)=>i.tipo==="variable"?s+Number(i.valor||0):s,0);
   const totalGastosFijos = sumSingle(gastosFijos);
   const totalNoGuilt    = Object.values(noGuiltSpend).reduce((s,v)=>s+Number(v||0),0);
-
   const totalInvFijo = Object.values(inversion).reduce((s,x)=>s+Number(x.realFijo||0),0);
   const totalInvVar  = Object.values(inversion).reduce((s,x)=>s+Number(x.realVariable||0),0);
   const totalAhrFijo = Object.values(ahorro).reduce((s,x)=>s+Number(x.realFijo||0),0);
@@ -149,7 +148,6 @@ export default function FinanzasPersonales() {
   const handleIngresoChange       = (k,f,v)=>setIngresos(p=>({...p,[k]:{...p[k],[f]:v}}));
   const handleGastoFijoRealChange = (k,v)=>setGastosFijos(p=>({...p,[k]:{...p[k],real:v}}));
   const handleNoGuiltChange       = (k,v)=>setNoGuiltSpend(p=>({...p,[k]:v}));
-
   const handleInvChange = (k,field,val)=>{
     let n=Number(val)||0;
     if(field==="realVariable"){
@@ -177,7 +175,6 @@ export default function FinanzasPersonales() {
     }
     setGastosVariables(p=>({...p,[k]:{...p[k],[field]:String(n)}}));
   };
-
   const addKey=(setter,label)=>setter(p=>({
     ...p,
     [`${label} ${Object.keys(p).length+1}`]:{presupuesto:0,realFijo:"",realVariable:""}
@@ -195,7 +192,6 @@ export default function FinanzasPersonales() {
       const rf=Number(x.realFijo||0), rv=Number(x.realVariable||0);
       rows.push([cat,k,x.presupuesto,rf,percent(rf),rv,percentVar(rv),months[selectedMonth],selectedYear]);
     });
-
     pushSingle("Gastos Fijos",gastosFijos);
     Object.entries(noGuiltSpend).forEach(([k,v])=>{
       const rv=Number(v||0);
@@ -204,7 +200,6 @@ export default function FinanzasPersonales() {
     pushDual("Inversión",inversion);
     pushDual("Ahorro",ahorro);
     pushDual("Gastos Variables",gastosVariables);
-
     createBlobLink(rows.map(r=>r.join(",")).join("\n"),
       `estado-financiero-${months[selectedMonth]}-${selectedYear}.csv`
     );
@@ -329,9 +324,9 @@ export default function FinanzasPersonales() {
         {label:"Inversión",      data:inversion,       handler:handleInvChange},
         {label:"Ahorro",         data:ahorro,          handler:handleAhorChange},
         {label:"Gasto variable", data:gastosVariables, handler:handleVarChange}
-      ].map(({label,data,handler})=>{
-        const fixedSum = Object.values(data).reduce((s,x)=>s+Number(x.realFijo||0),0);
-        const varSum   = Object.values(data).reduce((s,x)=>s+Number(x.realVariable||0),0);
+      ].map(({label,data,handler})=>{  
+        const fixedSum = Object.values(data).reduce((s,x)=>s+Number(x.realFijo||0),0);  
+        const varSum   = Object.values(data).reduce((s,x)=>s+Number(x.realVariable||0),0);  
         return (
           <Card key={label}><CardContent className="space-y-2">
             <h2 className="font-semibold text-lg">
@@ -360,14 +355,21 @@ export default function FinanzasPersonales() {
                   />
                   <span>{percentVar(rv)}%</span>
                   <Button size="icon" variant="ghost"
-                          onClick={()=>deleteKey(label==="Inversión"?setInversion:label==="Ahorro"?setAhorro:setGastosVariables,k)}>
+                          onClick={()=>deleteKey(
+                            label==="Inversión"?setInversion:
+                            label==="Ahorro"?setAhorro:
+                            setGastosVariables,
+                            k
+                          )}>
                     🗑
                   </Button>
                 </div>
               );
             })}
             <Button size="sm" onClick={()=>addKey(
-              label==="Inversión"?setInversion:label==="Ahorro"?setAhorro:setGastosVariables,
+              label==="Inversión"?setInversion:
+              label==="Ahorro"?setAhorro:
+              setGastosVariables,
               label
             )}>
               Añadir {label.toLowerCase()}
@@ -393,11 +395,19 @@ export default function FinanzasPersonales() {
         <p>Variables fijo: ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)</p>
         <p>Variables var: ${totalGVarVar.toLocaleString()} ({percentVar(totalGVarVar)}%)</p>
 
-        <p className="text-sm font-semibold">
+        <p
+          className={`text-sm font-semibold ${
+            disponibleFijo >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
           Disponible fijo: ${disponibleFijo.toLocaleString()} ({percent(disponibleFijo)}%)
         </p>
-        <p className="text-sm font-semibold">
-          Disponible var: ${disponibleVar.toLocaleString()} ({percentVar(disponibleVar)}%)
+        <p
+          className={`text-sm font-semibold ${
+            disponibleVar  >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          Disponible var:  ${disponibleVar.toLocaleString()} ({percentVar(disponibleVar)}%)
         </p>
 
         <p className="font-bold pt-2">
