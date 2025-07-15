@@ -159,6 +159,8 @@ export default function FinanzasPersonales() {
   const totalInversion = totalInvFijo + totalInvVar;
   const totalAhorro = totalAhrFijo + totalAhrVar;
   const totalGastos = totalGastosFijos + totalNoGuilt + totalInversion + totalAhorro + totalGVarFijo;
+  const renameAhorroKey = (oldKey, newKey) => { }
+  const renameGVCatKey   = (oldKey, newKey) => { }
 
   const percent = (v) => (totalFixedIngresos ? ((v / totalFixedIngresos) * 100).toFixed(1) : "0.0");
   const percentVar = (v) => (totalIngresosVariables ? ((v / totalIngresosVariables) * 100).toFixed(1) : "0.0");
@@ -257,10 +259,10 @@ export default function FinanzasPersonales() {
         rows.push([cat, k, x.presupuesto, rf, percent(rf), rv, percentVar(rv), months[selectedMonth], selectedYear]);
       });
 
+    /* Gastos Variables (sin fila de total real fijo por categoría) */
     const pushGV = (obj) =>
       Object.entries(obj).forEach(([k, x]) => {
-        const subtotal = calcSubTotal(x.subItems);
-        rows.push(["Gastos Variables", k, x.presupuesto, subtotal, percent(subtotal), "-", "-", months[selectedMonth], selectedYear]);
+        rows.push(["Gastos Variables", k, x.presupuesto, "-", "-", "-", "-", months[selectedMonth], selectedYear]);
         Object.entries(x.subItems).forEach(([subK, subX]) => {
           const subRf = Number(subX.realFijo || 0);
           rows.push([`Gastos Variables - ${k} (Sub)`, subK, "-", subRf, percent(subRf), "-", "-", months[selectedMonth], selectedYear]);
@@ -482,10 +484,17 @@ export default function FinanzasPersonales() {
               const rf = Number(x.realFijo || 0), rv = Number(x.realVariable || 0);
               return (
                 <div key={k} className="space-y-2 py-3 px-4 bg-sky-50 rounded-lg shadow-sm border-b last:border-0">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-sm">{k}</span>
-                    <span className="text-sm text-gray-500">${x.presupuesto.toLocaleString()}</span>
-                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <Input
+                      className="font-medium text-sm flex-1 bg-transparent"
+                      defaultValue={k}
+                      onBlur={(e) => renameAhorroKey(k, e.target.value.trim())}
+                   />
+                   <span className="text-sm text-gray-500">
+                     ${x.presupuesto.toLocaleString()}
+                  </span>
+                </div>
+
                   <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex-1">
                       <label className="block text-xs text-gray-600 mb-1">Real fijo</label>
@@ -527,13 +536,20 @@ export default function FinanzasPersonales() {
               return (
                 <Card key={catKey} className="bg-sky-50 shadow-sm">
                   <CardContent>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-gray-700">{catKey}</span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Input
+                        className="h-8 flex-1 bg-transparent font-medium text-gray-700"
+                        defaultValue={catKey}
+                        onBlur={(e) => renameGVCatKey(catKey, e.target.value.trim())}
+                      />
                       <span className="text-sm text-gray-600">
-                        Presupuesto: ${catVal.presupuesto.toLocaleString()} | Restante: ${restante.toLocaleString()}
+                        Presupuesto: ${catVal.presupuesto.toLocaleString()}
                       </span>
-                      <Button size="icon" variant="ghost" onClick={() => deleteKey(setGastosVariables, catKey)}>🗑</Button>
+                      <Button size="icon" variant="ghost" onClick={() => deleteKey(setGastosVariables, catKey)}>
+                        🗑
+                      </Button>
                     </div>
+
                     <div className="space-y-2">
                       {/* Sub‑ítems */}
                       {Object.entries(catVal.subItems).map(([subK, subX]) => (
