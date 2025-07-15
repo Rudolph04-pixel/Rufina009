@@ -731,7 +731,6 @@ export default function FinanzasPersonales() {
                <p><strong>No Guilt Spend:</strong> ${totalNoGuilt.toLocaleString()} ({percent(totalNoGuilt)}%)</p>
                <p><strong>Inversión fijo:</strong> ${totalInvFijo.toLocaleString()} ({percent(totalInvFijo)}%)</p>
                <p><strong>Ahorro fijo:</strong> ${totalAhrFijo.toLocaleString()} ({percent(totalAhrFijo)}%)</p>
-               <p><strong>Variables fijo (incl. sub-ítems):</strong> ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)</p>
                <p className={`text-sm font-semibold ${disponibleFijo>=0?"text-green-600":"text-red-600"}`}>Disponible fijo: ${disponibleFijo.toLocaleString()} ({percent(disponibleFijo)}%)</p>
                <p className={`text-sm font-semibold ${disponibleVar>=0?"text-green-600":"text-red-600"}`}>Disponible var: ${disponibleVar.toLocaleString()} ({percent(disponibleVar)}%)</p>
                <Button className="mt-2 w-full h-12" onClick={exportCSV}>Exportar CSV</Button>
