@@ -554,22 +554,37 @@ export default function FinanzasPersonales() {
             {Object.entries(gastosVariables).map(([catKey, catVal]) => {
               const subTotal = calcSubTotal(catVal.subItems);
               const restante = catVal.presupuesto - subTotal;
+              const pctCat   = catVal.presupuesto
+                ? ((subTotal / catVal.presupuesto) * 100).toFixed(1)
+                : "0.0";
               return (
                 <Card key={catKey} className="bg-sky-50 shadow-sm">
                   <CardContent>
                     <div className="flex items-center gap-2 mb-2">
-                      <Input
-                        className="h-8 flex-1 bg-transparent font-medium text-gray-700"
-                        defaultValue={catKey}
-                        onBlur={(e) => renameGVCatKey(catKey, e.target.value.trim())}
-                      />
-                      <span className="text-sm text-gray-600">
-                        Presupuesto: ${catVal.presupuesto.toLocaleString()}
+                    <Input
+                      className="h-8 flex-1 bg-transparent font-medium text-gray-700"
+                      defaultValue={catKey}
+                      onBlur={(e) => renameGVCatKey(catKey, e.target.value.trim())}
+                    />
+
+                    {/* indicadores de presupuesto, gastado y restante */}
+                    <div className="text-xs flex flex-col items-end">
+                      <span>Pres: ${catVal.presupuesto.toLocaleString()}</span>
+                      <span>Gastado: ${subTotal.toLocaleString()} ({pctCat}%)</span>
+                      <span className={restante >= 0 ? 'text-green-700' : 'text-red-600'}>
+                        Rest: ${restante.toLocaleString()}
                       </span>
-                      <Button size="icon" variant="ghost" onClick={() => deleteKey(setGastosVariables, catKey)}>
-                        🗑
-                      </Button>
                     </div>
+
+                    {/* borrar categoría */}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => deleteKey(setGastosVariables, catKey)}
+                    >
+                      🗑
+                    </Button>
+                  </div>
 
                     <div className="space-y-2">
                       {/* Sub‑ítems */}
