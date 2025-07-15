@@ -723,21 +723,70 @@ export default function FinanzasPersonales() {
         </Card>
 
         {/* Resumen & Export */}
-           <Card>
-             <CardContent className="space-y-1 text-sm">
-               <p><strong>Ingresos fijos (100%):</strong> ${totalFixedIngresos.toLocaleString()}</p>
-               <p><strong>Ingresos variables:</strong> ${totalIngresosVariables.toLocaleString()}</p>
-               <p><strong>Gastos Fijos:</strong> ${totalGastosFijos.toLocaleString()} ({percent(totalGastosFijos)}%)</p>
-               <p><strong>No Guilt Spend:</strong> ${totalNoGuilt.toLocaleString()} ({percent(totalNoGuilt)}%)</p>
-               <p><strong>Inversión fijo:</strong> ${totalInvFijo.toLocaleString()} ({percent(totalInvFijo)}%)</p>
-               <p><strong>Ahorro fijo:</strong> ${totalAhrFijo.toLocaleString()} ({percent(totalAhrFijo)}%)</p>
-               <p><strong>Variables fijo (incl. sub-ítems):</strong> ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)</p>
-               <p className={`text-sm font-semibold ${disponibleFijo>=0?"text-green-600":"text-red-600"}`}>Disponible fijo: ${disponibleFijo.toLocaleString()} ({percent(disponibleFijo)}%)</p>
-               <p className={`text-sm font-semibold ${disponibleVar>=0?"text-green-600":"text-red-600"}`}>Disponible var: ${disponibleVar.toLocaleString()} ({percent(disponibleVar)}%)</p>
-               <Button className="mt-2 w-full h-12" onClick={exportCSV}>Exportar CSV</Button>
+        <Card>
+          <CardContent className="space-y-1 text-sm">
+            <p>
+              <strong>Ingresos fijos (100%):</strong> ${totalFixedIngresos.toLocaleString()}
+            </p>
+            <p>
+              <strong>Ingresos variables:</strong> ${totalIngresosVariables.toLocaleString()}
+            </p>
+
+            <p>
+              Gastos Fijos: ${totalGastosFijos.toLocaleString()} ({percent(totalGastosFijos)}%)
+            </p>
+            <p>
+              No Guilt Spend: ${totalNoGuilt.toLocaleString()} ({percent(totalNoGuilt)}%)
+            </p>
+
+            <p>
+              Inversión fijo: ${totalInvFijo.toLocaleString()} ({percent(totalInvFijo)}%)
+            </p>
+            <p>
+              Inversión var: ${totalInvVar.toLocaleString()} ({percentVar(totalInvVar)}%)
+            </p>
+
+            <p>
+              Ahorro fijo: ${totalAhrFijo.toLocaleString()} ({percent(totalAhrFijo)}%)
+            </p>
+            <p>
+              Ahorro var: ${totalAhrVar.toLocaleString()} ({percentVar(totalAhrVar)}%)
+            </p>
+
+            <p>
+              Variables fijo (incl. sub-ítems): ${totalGVarFijo.toLocaleString()} ({percent(totalGVarFijo)}%)
+            </p>
+            <p>
+              Variables var (incl. sub-ítems): ${totalGVarVar.toLocaleString()} ({percentVar(totalGVarVar)}%)
+            </p>
+
+            <p
+              className={`text-sm font-semibold ${
+                disponibleFijo >= 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              Disponible fijo: ${disponibleFijo.toLocaleString()} ({percent(disponibleFijo)}%)
+            </p>
+            <p
+              className={`text-sm font-semibold ${
+                disponibleVar >= 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              Disponible var: ${disponibleVar.toLocaleString()} ({percentVar(disponibleVar)}%)
+            </p>
+
+            <p className="font-bold pt-2">
+              Balance (nominal): ${(totalIngresosNominal - totalGastos).toLocaleString()}
+            </p>
+
+            <Button className="mt-2 w-full h-12" onClick={exportCSV}>
+              Exportar CSV
+            </Button>
           </CardContent>
         </Card>
-      </div>
-    </div>
-  );
-}
+
+      </div> {/* cierra max-w-lg mx-auto */}
+    </div>  
+  )
+};
+  
