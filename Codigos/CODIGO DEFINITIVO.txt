@@ -36,6 +36,36 @@ const AccordionItem = ({ value, children }) => {
     return <div className="border-b">{children}</div>;
 };
 
+const AccordionTrigger = ({ className, children }) => {
+    const { toggleSection } = useContext(AccordionContext);
+    // Extraer el valor del padre (asumiendo que el padre es AccordionItem)
+    // En una implementación real, esto se manejaría de forma más robusta.
+    // Aquí, asumimos que el `value` se pasa implícitamente o se extrae del contexto del item.
+    // Para este mock, vamos a necesitar pasar el 'value' al trigger.
+    const value = children[0]?.props?.value || 'default'; // Solución temporal para el mock
+
+    return (
+        <button
+            onClick={() => toggleSection(value)}
+            className={`w-full text-left py-4 px-2 font-semibold flex justify-between items-center ${className}`}
+        >
+            <span>{children}</span>
+            <span>▼</span>
+        </button>
+    );
+};
+
+const AccordionContent = ({ children }) => {
+    const { openSections } = useContext(AccordionContext);
+    // Este es un truco para obtener el 'value' del AccordionItem padre.
+    // Una librería real lo manejaría internamente.
+    const parentValue = children?.props?.value;
+    if (!openSections.includes(parentValue)) {
+        return null;
+    }
+    return <div className="p-2">{children}</div>;
+};
+
 // Componente Wrapper para que el contenido del acordeón funcione
 const AccordionContentWrapper = ({ value, children }) => {
     const { openSections } = useContext(AccordionContext);
@@ -198,7 +228,7 @@ export default function FinanzasPersonales() {
   const totalAssignedVar = totalInvVar + totalAhrVar;
   const remainingVarPool = totalIngresosVariables - totalAssignedVar;
 
-  const disponibleFijo = totalFixedIngresos - (totalGastosFijos + totalNoGuilt + totalInvFijo + totalAhrFijo + totalGVarFijo);
+  const disponibleFijo = totalFixedIngresos - (totalGastosFijos + totalInvFijo + totalAhrFijo + totalGVarFijo);
   const disponibleVar = remainingVarPool;
 
   /* Handlers */
@@ -350,13 +380,11 @@ export default function FinanzasPersonales() {
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
                 <CardContent className="space-y-3">
                   {Object.entries(noGuiltSpend).map(([k, v]) => (
-                    <div key={k} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-sm">
-                        <Input className={`w-full sm:flex-1 ${darkMode ? 'bg-slate-700 border-slate-600' : ''}`} defaultValue={k} placeholder="Item" onBlur={(e) => renameNoGuiltKey(k, e.target.value.trim())} />
-                        <div className="flex items-center gap-2">
-                            <Input className={`flex-1 sm:w-28 ${darkMode ? 'bg-slate-700 border-slate-600' : ''}`} type="number" value={v} placeholder="Monto" onChange={(e) => handleNoGuiltChange(k, e.target.value)} />
-                            <span className="w-16 text-right">{percent(Number(v || 0))}%</span>
-                            <Button className="bg-transparent hover:bg-red-500/20 text-lg" onClick={() => deleteKey(setNoGuiltSpend, k)}>🗑️</Button>
-                        </div>
+                    <div key={k} className="grid grid-cols-5 gap-2 items-center text-sm">
+                      <Input className={`col-span-2 ${darkMode ? 'bg-slate-700 border-slate-600' : ''}`} defaultValue={k} placeholder="Item" onBlur={(e) => renameNoGuiltKey(k, e.target.value.trim())} />
+                      <Input className={`${darkMode ? 'bg-slate-700 border-slate-600' : ''}`} type="number" value={v} placeholder="Monto" onChange={(e) => handleNoGuiltChange(k, e.target.value)} />
+                      <Button className="bg-transparent hover:bg-red-500/20 text-lg" onClick={() => deleteKey(setNoGuiltSpend, k)}>🗑️</Button>
+                      <span className="text-right">{percent(Number(v || 0))}%</span>
                     </div>
                   ))}
                   <Button className="w-full bg-slate-600 hover:bg-slate-700" onClick={() => addKey(setNoGuiltSpend, "Item", "")}>Añadir gasto</Button>
@@ -452,28 +480,10 @@ export default function FinanzasPersonales() {
                           </div>
                           <div className="space-y-2">
                             {Object.entries(catVal.subItems).map(([subK, subX]) => (
-                              <div key={subK} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                <Input 
-                                    className={`w-full sm:flex-1 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} 
-                                    defaultValue={subK} 
-                                    onBlur={(e) => renameSubItem(catKey, subK, e.target.value.trim())} 
-                                    placeholder="Nombre del ítem"
-                                />
-                                <div className="flex items-center gap-2">
-                                    <Input 
-                                        className={`flex-1 sm:w-32 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} 
-                                        type="number" 
-                                        value={subX.realFijo} 
-                                        placeholder="Monto" 
-                                        onChange={(e) => handleSubItemChange(catKey, subK, e.target.value)} 
-                                    />
-                                    <Button 
-                                        className="bg-transparent hover:bg-red-500/20 text-lg" 
-                                        onClick={() => deleteSubItem(catKey, subK)}
-                                    >
-                                        🗑️
-                                    </Button>
-                                </div>
+                              <div key={subK} className="flex items-center gap-2">
+                                <Input className={`flex-1 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} defaultValue={subK} onBlur={(e) => renameSubItem(catKey, subK, e.target.value.trim())} />
+                                <Input className={`w-32 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} type="number" value={subX.realFijo} placeholder="Monto" onChange={(e) => handleSubItemChange(catKey, subK, e.target.value)} />
+                                <Button className="bg-transparent hover:bg-red-500/20 text-lg" onClick={() => deleteSubItem(catKey, subK)}>🗑️</Button>
                               </div>
                             ))}
                             <Button className={`w-full h-10 ${darkMode ? 'bg-slate-600 hover:bg-slate-500' : 'bg-sky-200 text-sky-800 hover:bg-sky-300'}`} onClick={() => addSubItem(catKey)}>Añadir ítem</Button>
