@@ -89,19 +89,18 @@ function FinanzasPersonales() {
     document.body.style.backgroundColor = darkMode ? '#020617' : '#f0f9ff';
  }, [darkMode]);
 
- // --- MODIFICATION: Set current date to July 2025 for demonstration ---
+ // Set current date to July 2025 for demonstration
  const today = new Date('2025-07-27T12:00:00');
  const [selectedMonth, setSelectedMonth] = useState(String(today.getMonth())); // July is month 6
  const [selectedYear, setSelectedYear] = useState(String(today.getFullYear())); // 2025
 
- // --- MODIFICATION: Helper function for Chilean number formatting ---
+ // Helper function for Chilean number formatting
  const formatCLP = (num) => {
     const number = Number(num) || 0;
-    // 'es-CL' uses a period for thousands and a comma for decimals.
     return number.toLocaleString('es-CL');
  };
 
- // Financial State with values adjusted for CLP
+ // Financial State with user's updated values
  const [ingresos, setIngresos] = useState({
     'Ingreso Principal': { valor: "3000000", tipo: "fijo" },
     'Ingreso Freelance': { valor: "500000", tipo: "variable" },
@@ -125,7 +124,7 @@ function FinanzasPersonales() {
     'Jardin': { presupuesto: 11000, real: "" },
  });
 
- const [noGuiltSpend, setGuilt_Free_20_35] = useState({
+ const [guiltFreeSpend, setGuiltFreeSpend] = useState({
      'Café y salidas': "50000",
      'Hobbies': "30000",
  });
@@ -143,7 +142,6 @@ function FinanzasPersonales() {
     "Contribuciones": { presupuesto: 103200, realFijo: "", realVariable: "" },
     "Fondo_Abu": { presupuesto: 15000, realFijo: "", realVariable: "" },
     "Auto_PermiCir-Mant": { presupuesto: 26000, realFijo: "", realVariable: "" },
-
  });
 
  const [gastosVariables, setGastosVariables] = useState({
@@ -159,9 +157,8 @@ function FinanzasPersonales() {
  });
 
  /* ------------------ Data Persistence ------------------ */
- const LS_KEY = "finanzas-personales-cl-v1"; // Updated key for new structure
+ const LS_KEY = "finanzas-personales-cl-v2"; // Updated key
 
- // Load data from localStorage on initial render
  useEffect(() => {
     try {
       const data = localStorage.getItem(LS_KEY);
@@ -170,28 +167,23 @@ function FinanzasPersonales() {
 
       if (d.ingresos) setIngresos(d.ingresos);
       if (d.gastosFijos) setGastosFijos(d.gastosFijos);
-      if (d.noGuiltSpend) setNoGuiltSpend(d.noGuiltSpend);
+      if (d.guiltFreeSpend) setGuiltFreeSpend(d.guiltFreeSpend); // Updated
       if (d.inversion) setInversion(d.inversion);
       if (d.ahorro) setAhorro(d.ahorro);
       if (d.gastosVariables) setGastosVariables(d.gastosVariables);
-      // We don't load the date, so it always defaults to the current one on load
-      // if (d.selectedMonth) setSelectedMonth(d.selectedMonth);
-      // if (d.selectedYear) setSelectedYear(d.selectedYear);
       if (typeof d.darkMode === 'boolean') setDarkMode(d.darkMode);
-
     } catch (e) {
       console.error("Error loading from localStorage:", e);
     }
  }, []);
 
- // Save data to localStorage whenever it changes
  useEffect(() => {
     const dataToStore = {
-      ingresos, gastosFijos, noGuiltSpend, inversion, ahorro,
+      ingresos, gastosFijos, guiltFreeSpend, inversion, ahorro, // Updated
       gastosVariables, selectedMonth, selectedYear, darkMode
     };
     localStorage.setItem(LS_KEY, JSON.stringify(dataToStore));
- }, [ingresos, gastosFijos, noGuiltSpend, inversion, ahorro, gastosVariables, selectedMonth, selectedYear, darkMode]);
+ }, [ingresos, gastosFijos, guiltFreeSpend, inversion, ahorro, gastosVariables, selectedMonth, selectedYear, darkMode]);
 
  /* ------------------ Calculations ------------------ */
  const sumValues = (obj, field) => Object.values(obj).reduce((sum, item) => sum + (Number(item[field]) || 0), 0);
@@ -201,7 +193,7 @@ function FinanzasPersonales() {
  const totalIngresosVariables = totalIngresosNominal - totalFixedIngresos;
 
  const totalGastosFijos = sumValues(gastosFijos, 'real');
- const totalNoGuilt = Object.values(noGuiltSpend).reduce((s, v) => s + Number(v || 0), 0);
+ const totalNoGuilt = Object.values(guiltFreeSpend).reduce((s, v) => s + Number(v || 0), 0); // Updated
 
  const totalInvFijo = sumValues(inversion, 'realFijo');
  const totalInvVar = sumValues(inversion, 'realVariable');
@@ -228,7 +220,7 @@ function FinanzasPersonales() {
     { name: 'Inversión', value: totalInvFijo },
     { name: 'Ahorro', value: totalAhrFijo },
     { name: 'Gastos Variables', value: totalGVarFijo },
- ].filter(item => item.value > 0); // Filter out categories with zero value
+ ].filter(item => item.value > 0);
 
  const COLORS = ['#0ea5e9', '#10b981', '#f97316', '#8b5cf6', '#ef4444'];
  
@@ -248,15 +240,11 @@ function FinanzasPersonales() {
     return null;
  };
 
-
  /* ------------------ Event Handlers ------------------ */
-
- // Generic handler to update a state object
  const handleStateChange = (setter, key, field, value) => {
     setter(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
  };
 
- // Generic handlers for adding, deleting, and renaming keys in state objects
  const addKey = (setter, label, value) => setter(p => ({ ...p, [`${label} ${Object.keys(p).length + 1}`]: value }));
  const deleteKey = (setter, key) => setter(p => { const { [key]: _, ...rest } = p; return rest; });
  const renameKey = (setter, oldKey, newKey) => {
@@ -267,13 +255,11 @@ function FinanzasPersonales() {
     });
  };
 
- // Specific handlers for each section
  const handleIngresoChange = (k, f, v) => handleStateChange(setIngresos, k, f, v);
  const handleGastoFijoRealChange = (k, v) => handleStateChange(setGastosFijos, k, 'real', v);
- const handleNoGuiltChange = (k, v) => setNoGuiltSpend(p => ({ ...p, [k]: v }));
- const renameNoGuiltKey = (oldKey, newKey) => renameKey(setNoGuiltSpend, oldKey, newKey);
+ const handleGuiltFreeChange = (k, v) => setGuiltFreeSpend(p => ({ ...p, [k]: v })); // Updated
+ const renameGuiltFreeKey = (oldKey, newKey) => renameKey(setGuiltFreeSpend, oldKey, newKey); // Updated
 
- // Handlers for variable pool (Savings and Investment from variable income)
  const handlePoolChange = (setter, k, field, val, pool, currentVal) => {
     let n = Number(val) || 0;
     if (field === "realVariable") {
@@ -285,7 +271,6 @@ function FinanzasPersonales() {
  const handleInvChange = (k, f, v) => handlePoolChange(setInversion, k, f, v, remainingVarPool, Number(inversion[k].realVariable || 0));
  const handleAhorChange = (k, f, v) => handlePoolChange(setAhorro, k, f, v, remainingVarPool, Number(ahorro[k].realVariable || 0));
 
- // Handlers for Variable Expenses sub-items
  const handleSubItemChange = (catKey, subKey, val) => {
     setGastosVariables(p => ({
       ...p, [catKey]: { ...p[catKey], subItems: { ...p[catKey].subItems, [subKey]: { realFijo: val } } }
@@ -318,7 +303,7 @@ function FinanzasPersonales() {
     const monthName = months[selectedMonth];
 
     Object.entries(gastosFijos).forEach(([k, v]) => rows.push(["Gastos Fijos", k, v.presupuesto, v.real, percent(v.real), "", "", monthName, selectedYear]));
-    Object.entries(noGuiltSpend).forEach(([k, v]) => rows.push(["No Guilt Spend", k, "", v, percent(v), "", "", monthName, selectedYear]));
+    Object.entries(guiltFreeSpend).forEach(([k, v]) => rows.push(["No Guilt Spend", k, "", v, percent(v), "", "", monthName, selectedYear])); // Updated
     Object.entries(inversion).forEach(([k, v]) => rows.push(["Inversión", k, v.presupuesto, v.realFijo, percent(v.realFijo), v.realVariable, percentVar(v.realVariable), monthName, selectedYear]));
     Object.entries(ahorro).forEach(([k, v]) => rows.push(["Ahorro", k, v.presupuesto, v.realFijo, percent(v.realFijo), v.realVariable, percentVar(v.realVariable), monthName, selectedYear]));
     Object.entries(gastosVariables).forEach(([k, v]) => {
@@ -343,7 +328,7 @@ function FinanzasPersonales() {
 
         {/* --- Header --- */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Mis Finanzas</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Ruta Rica</h1>
             <div className="flex items-center gap-2">
                 <Select
                     value={selectedMonth}
@@ -393,7 +378,7 @@ function FinanzasPersonales() {
          
           {/* Gastos Fijos Section */}
           <AccordionItem>
-            <AccordionTriggerWrapper value="gastos-fijos" className="hover:bg-slate-100 dark:hover:bg-slate-800">Gastos Fijos — {percent(totalGastosFijos)}%</AccordionTriggerWrapper>
+            <AccordionTriggerWrapper value="gastos-fijos" className="hover:bg-slate-100 dark:hover:bg-slate-800">Costos Fijos (50-60%) — {percent(totalGastosFijos)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="gastos-fijos">
               <Card className="bg-white dark:bg-slate-900">
                 <CardContent className="space-y-3 max-h-96 overflow-y-auto">
@@ -409,30 +394,35 @@ function FinanzasPersonales() {
             </AccordionContentWrapper>
           </AccordionItem>
 
-          {/* No Guilt Spend Section */}
+          {/* --- MODIFIED SECTION: No Guilt Spend --- */}
           <AccordionItem>
-            <AccordionTriggerWrapper value="no-guilt-spend" className="hover:bg-slate-100 dark:hover:bg-slate-800">Gastos "Sin Culpa" — {percent(totalNoGuilt)}%</AccordionTriggerWrapper>
+            <AccordionTriggerWrapper value="no-guilt-spend" className="hover:bg-slate-100 dark:hover:bg-slate-800">Gastos "Sin Culpa" (20-35%) — {percent(totalNoGuilt)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="no-guilt-spend">
               <Card className="bg-white dark:bg-slate-900">
                 <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-                  {Object.entries(noGuiltSpend).map(([k, v]) => (
-                    <div key={k} className="flex items-center gap-2 text-sm">
-                        <Input className="flex-1 dark:bg-slate-800 dark:border-slate-700" defaultValue={k} placeholder="Nombre del gasto" onBlur={(e) => renameNoGuiltKey(k, e.target.value.trim())} />
-                        <Input className="w-28 dark:bg-slate-800 dark:border-slate-700" type="number" value={v} placeholder="Monto" onChange={(e) => handleNoGuiltChange(k, e.target.value)} />
-                        <span className="w-16 text-right font-mono text-slate-500">{percent(v)}%</span>
-                        <Button className="bg-transparent hover:bg-red-500/20 text-red-500 p-2 h-9 w-9 flex items-center justify-center" onClick={() => deleteKey(setNoGuiltSpend, k)}>🗑️</Button>
+                  {Object.entries(guiltFreeSpend).map(([k, v]) => (
+                    <div key={k} className="grid grid-cols-12 gap-2 items-center text-sm">
+                      {/* 1. Input for item name (wider) */}
+                      <Input className="col-span-6 dark:bg-slate-800 dark:border-slate-700" defaultValue={k} placeholder="Nombre del gasto" onBlur={(e) => renameGuiltFreeKey(k, e.target.value.trim())} />
+                      {/* 2. Input for amount */}
+                      <Input className="col-span-3 dark:bg-slate-800 dark:border-slate-700" type="number" value={v} placeholder="Monto" onChange={(e) => handleGuiltFreeChange(k, e.target.value)} />
+                      {/* 3. Percentage */}
+                      <span className="col-span-2 text-right font-mono text-xs text-slate-500">{percent(v)}%</span>
+                      {/* 4. Delete button */}
+                      <Button className="col-span-1 bg-transparent hover:bg-red-500/20 text-red-500 p-2 h-9 w-9 flex items-center justify-center" onClick={() => deleteKey(setGuiltFreeSpend, k)}>🗑️</Button>
                     </div>
                   ))}
-                  <Button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300" onClick={() => addKey(setNoGuiltSpend, "Gasto", "")}>+ Añadir Gasto</Button>
+                  <Button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300" onClick={() => addKey(setGuiltFreeSpend, "Gasto", "")}>+ Añadir Gasto</Button>
                 </CardContent>
               </Card>
             </AccordionContentWrapper>
           </AccordionItem>
+          {/* --- END OF MODIFIED SECTION --- */}
 
           {/* Inversión y Ahorro Sections */}
           {[
-              {title: "Inversión", state: inversion, setter: setInversion, handler: handleInvChange, renamer: (k, nk) => renameKey(setInversion, k, nk), totalF: totalInvFijo, totalV: totalInvVar},
-              {title: "Ahorro", state: ahorro, setter: setAhorro, handler: handleAhorChange, renamer: (k, nk) => renameKey(setAhorro, k, nk), totalF: totalAhrFijo, totalV: totalAhrVar}
+              {title: "Inversión (10%)", state: inversion, setter: setInversion, handler: handleInvChange, renamer: (k, nk) => renameKey(setInversion, k, nk), totalF: totalInvFijo, totalV: totalInvVar},
+              {title: "Ahorro (5-10%)", state: ahorro, setter: setAhorro, handler: handleAhorChange, renamer: (k, nk) => renameKey(setAhorro, k, nk), totalF: totalAhrFijo, totalV: totalAhrVar}
           ].map(sec => (
             <AccordionItem key={sec.title}>
                 <AccordionTriggerWrapper value={sec.title.toLowerCase()} className="hover:bg-slate-100 dark:hover:bg-slate-800">{sec.title} — F: {percent(sec.totalF)}% | V: {percentVar(sec.totalV)}%</AccordionTriggerWrapper>
@@ -460,7 +450,7 @@ function FinanzasPersonales() {
                                     </div>
                                 </div>
                             ))}
-                            <Button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300" onClick={() => addKey(sec.setter, sec.title, { presupuesto: 0, realFijo: "", realVariable: "" })}>+ Añadir {sec.title}</Button>
+                            <Button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300" onClick={() => addKey(sec.setter, sec.title.split(' ')[0], { presupuesto: 0, realFijo: "", realVariable: "" })}>+ Añadir {sec.title.split(' ')[0]}</Button>
                         </CardContent>
                     </Card>
                 </AccordionContentWrapper>
@@ -570,7 +560,7 @@ function FinanzasPersonales() {
                   <p><strong>Ingresos Fijos:</strong></p><p className="text-right">${formatCLP(totalFixedIngresos)}</p>
                   <p><strong>Ingresos Variables:</strong></p><p className="text-right">${formatCLP(totalIngresosVariables)}</p>
                   <p className="col-span-2 border-b my-2 dark:border-slate-700"></p>
-                  <p>Gastos Fijos:</p><p className="text-right">-${formatCLP(totalGastosFijos)} <span className="text-slate-400">({percent(totalGastosFijos)}%)</span></p>
+                  <p>Costos Fijos:</p><p className="text-right">-${formatCLP(totalGastosFijos)} <span className="text-slate-400">({percent(totalGastosFijos)}%)</span></p>
                   <p>Gastos Sin Culpa:</p><p className="text-right">-${formatCLP(totalNoGuilt)} <span className="text-slate-400">({percent(totalNoGuilt)}%)</span></p>
                   <p>Inversión Fija:</p><p className="text-right">-${formatCLP(totalInvFijo)} <span className="text-slate-400">({percent(totalInvFijo)}%)</span></p>
                   <p>Ahorro Fijo:</p><p className="text-right">-${formatCLP(totalAhrFijo)} <span className="text-slate-400">({percent(totalAhrFijo)}%)</span></p>
