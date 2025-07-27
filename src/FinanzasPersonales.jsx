@@ -450,123 +450,142 @@ function FinanzasPersonales() {
             </AccordionItem>
           ))}
 
-          {/* Gastos Variables Section */}
-          <AccordionItem>
-            <AccordionTriggerWrapper value="gastos-variables" className="hover:bg-slate-100 dark:hover:bg-slate-800">Gastos Variables — {percent(totalGVarFijo)}%</AccordionTriggerWrapper>
+             <AccordionItem>
+            <AccordionTriggerWrapper
+              value="gastos-variables"
+              className="hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              Gastos Variables — {percent(totalGVarFijo)}%
+            </AccordionTriggerWrapper>
             <AccordionContentWrapper value="gastos-variables">
               <Card className="bg-white dark:bg-slate-900">
                 <CardContent className="space-y-4 max-h-96 overflow-y-auto">
-                  {Object.entries(gastosVariables).map(([catKey, catVal]) => {
-                    const subTotal = calcSubTotal(catVal.subItems);
-                    const restante = catVal.presupuesto - subTotal;
-                    return (
-                      <Card key={catKey} className="bg-slate-50 dark:bg-slate-800/50 shadow-sm">
-                        <CardContent className="p-3">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Input className="h-8 flex-1 bg-transparent border-0 p-0 focus:ring-0 font-medium" defaultValue={catKey} onBlur={(e) => renameKey(setGastosVariables, catKey, e.target.value.trim())} />
-                            <div className="text-xs flex flex-col items-end text-slate-500 dark:text-slate-400">
-                              <span>${subTotal.toLocaleString()} / ${catVal.presupuesto.toLocaleString()}</span>
-                              <span className={restante >= 0 ? 'text-green-500' : 'text-red-500'}>Rest: ${restante.toLocaleString()}</span>
-                            </div>
-                            <Button className="bg-transparent hover:bg-red-500/20 text-red-500 p-2 h-8 w-8 flex items-center justify-center" onClick={() => deleteKey(setGastosVariables, catKey)}>🗑️</Button>
+                  {Object.entries(gastosVariables).map(([catKey, catVal]) => (
+                    <Card
+                      key={catKey}
+                      className="bg-slate-50 dark:bg-slate-800/50 shadow-sm"
+                    >
+                      <CardContent className="p-3 space-y-2">
+                        {Object.entries(catVal.subItems).map(([subK, subX]) => (
+                          <div
+                            key={subK}
+                            className="grid grid-cols-12 gap-2 items-center"
+                          >
+                            {/* NOMBRE 7/12 */}
+                            <Input
+                              className="col-span-7 text-sm dark:bg-slate-700 dark:border-slate-600"
+                              defaultValue={subK}
+                              placeholder="Nombre del ítem"
+                              onBlur={(e) =>
+                                renameSubItem(catKey, subK, e.target.value.trim())
+                              }
+                            />
+                            {/* MONTO 3/12 */}
+                            <Input
+                              className="col-span-3 text-sm dark:bg-slate-700 dark:border-slate-600"
+                              type="number"
+                              value={subX.realFijo}
+                              placeholder="Monto"
+                              onChange={(e) =>
+                                handleSubItemChange(catKey, subK, e.target.value)
+                              }
+                            />
+                            {/* % 1/12 */}
+                            <span className="col-span-1 text-right font-mono text-slate-500">
+                              {percent(Number(subX.realFijo))}%
+                            </span>
+                            {/* BORRAR 1/12 */}
+                            <Button
+                              className="col-span-1 bg-transparent hover:bg-red-500/20 text-red-500 p-2 h-8 w-8 flex items-center justify-center"
+                              onClick={() => deleteSubItem(catKey, subK)}
+                            >
+                              🗑️
+                            </Button>
                           </div>
-                          <div className="space-y-2">
-                            {Object.entries(catVal.subItems).map(([subK, subX]) => (
-                              <div key={subK} className="flex items-center gap-2">
-                                <Input className="flex-1 text-sm dark:bg-slate-700 dark:border-slate-600" defaultValue={subK} onBlur={(e) => renameSubItem(catKey, subK, e.target.value.trim())} placeholder="Nombre del ítem" />
-                                <Input className="w-32 text-sm dark:bg-slate-700 dark:border-slate-600" type="number" value={subX.realFijo} placeholder="Monto" onChange={(e) => handleSubItemChange(catKey, subK, e.target.value)} />
-                                <Button className="bg-transparent hover:bg-red-500/20 text-red-500 p-2 h-9 w-9 flex items-center justify-center" onClick={() => deleteSubItem(catKey, subK)}>🗑️</Button>
-                              </div>
-                            ))}
-                            <Button className="w-full h-9 text-sm bg-slate-200 hover:bg-slate-300 text-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300" onClick={() => addSubItem(catKey)}>+ Añadir ítem</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                  <Button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300" onClick={() => addKey(setGastosVariables, "Categoría", { presupuesto: 0, subItems: {} })}>+ Añadir Categoría</Button>
+                        ))}
+                        <Button
+                          className="w-full h-9 text-sm bg-slate-200 hover:bg-slate-300 text-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300"
+                          onClick={() => addSubItem(catKey)}
+                        >
+                          + Añadir ítem
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Button
+                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300"
+                    onClick={() =>
+                      addKey(setGastosVariables, "Categoría", {
+                        presupuesto: 0,
+                        subItems: {},
+                      })
+                    }
+                  >
+                    + Añadir Categoría
+                  </Button>
                 </CardContent>
               </Card>
             </AccordionContentWrapper>
           </AccordionItem>
         </Accordion>
 
-        {/* --- Chart Section --- */}
+        {/* --------- CHART TOGGLE --------- */}
         <div className="text-center">
-            <Button className="bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600" onClick={() => setShowChart(!showChart)}>
-                {showChart ? 'Ocultar Gráfico' : '📊 Ver Gráfico'}
-            </Button>
+          <Button
+            className="bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600"
+            onClick={() => setShowChart((p) => !p)}
+          >
+            {showChart ? "Ocultar Gráfico" : "📊 Ver Gráfico"}
+          </Button>
         </div>
 
+        {/* --------- CHART --------- */}
         {showChart && (
-            <Card className="bg-white dark:bg-slate-900">
-                <CardContent>
-                    <h3 className="text-center font-semibold mb-4 text-slate-900 dark:text-white">Distribución de Gastos Fijos</h3>
-                    {chartData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={chartData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={70}
-                                    outerRadius={110}
-                                    fill="#8884d8"
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    labelLine={false}
-                                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-                                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                                        const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
-                                        const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
-                                        return (
-                                            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12px" fontWeight="bold">
-                                                {`${(percent * 100).toFixed(0)}%`}
-                                            </text>
-                                        );
-                                    }}
-                                >
-                                    {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip content={<CustomTooltip />} />
-                                <Legend iconSize={10} wrapperStyle={{fontSize: "12px"}}/>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className="text-center py-10 text-slate-500">
-                            No hay datos de gastos para mostrar en el gráfico.
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+          <Card className="bg-white dark:bg-slate-900">
+            <CardContent>
+              <h3 className="text-center font-semibold mb-4">
+                Distribución de Gastos Variables
+              </h3>
+              {chartData[0].value ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={110}
+                      paddingAngle={4}
+                      dataKey="value"
+                      nameKey="name"
+                      labelLine={false}
+                      label={({ percent }) =>
+                        `${(percent * 100).toFixed(0)}%`
+                      }
+                    >
+                      {chartData.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend iconSize={10} wrapperStyle={{ fontSize: "12px" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center py-10 text-slate-500">
+                  No hay datos de gastos para mostrar
+                </p>
+              )}
+            </CardContent>
+          </Card>
         )}
-
-        {/* --- Summary & Export --- */}
-        <Card className="bg-white dark:bg-slate-900">
-          <CardContent className="space-y-2 text-sm p-4">
-              <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">Resumen Mensual</h3>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                  <p><strong>Ingresos Fijos:</strong></p><p className="text-right">${totalFixedIngresos.toLocaleString()}</p>
-                  <p><strong>Ingresos Variables:</strong></p><p className="text-right">${totalIngresosVariables.toLocaleString()}</p>
-                  <p className="col-span-2 border-b my-2 dark:border-slate-700"></p>
-                  <p>Gastos Fijos:</p><p className="text-right">-${totalGastosFijos.toLocaleString()} <span className="text-slate-400">({percent(totalGastosFijos)}%)</span></p>
-                  <p>Gastos Sin Culpa:</p><p className="text-right">-${totalNoGuilt.toLocaleString()} <span className="text-slate-400">({percent(totalNoGuilt)}%)</span></p>
-                  <p>Inversión Fija:</p><p className="text-right">-${totalInvFijo.toLocaleString()} <span className="text-slate-400">({percent(totalInvFijo)}%)</span></p>
-                  <p>Ahorro Fijo:</p><p className="text-right">-${totalAhrFijo.toLocaleString()} <span className="text-slate-400">({percent(totalAhrFijo)}%)</span></p>
-                  <p>Gastos Variables:</p><p className="text-right">-${totalGVarFijo.toLocaleString()} <span className="text-slate-400">({percent(totalGVarFijo)}%)</span></p>
-                  <p className="col-span-2 border-b my-2 dark:border-slate-700"></p>
-                  <p className={`font-semibold`}>Disponible Fijo:</p><p className={`text-right font-semibold ${disponibleFijo >= 0 ? "text-green-500" : "text-red-500"}`}>${disponibleFijo.toLocaleString()} <span className="text-slate-400">({percent(disponibleFijo)}%)</span></p>
-                  <p className={`font-semibold`}>Disponible Variable:</p><p className={`text-right font-semibold ${disponibleVar >= 0 ? "text-green-500" : "text-red-500"}`}>${disponibleVar.toLocaleString()} <span className="text-slate-400">({percentVar(disponibleVar)}%)</span></p>
-              </div>
-            <Button className="mt-4 w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={exportCSV}>Exportar a CSV</Button>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
+}
+
+export default function App() {
+  return <FinanzasPersonales />;
 }
 
 // Default export for the app
