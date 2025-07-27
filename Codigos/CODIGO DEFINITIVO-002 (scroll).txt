@@ -309,7 +309,7 @@ export default function FinanzasPersonales() {
             <AccordionTriggerWrapper value="ingresos" className={`${darkMode ? 'hover:bg-slate-800' : ''}`}>Ingresos</AccordionTriggerWrapper>
             <AccordionContentWrapper value="ingresos">
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 max-h-96 overflow-y-auto">
                   {Object.entries(ingresos).map(([k, v]) => (
                     <div key={k} className="grid grid-cols-1 sm:grid-cols-5 gap-2 items-center text-sm">
                       <Input className={`col-span-2 ${darkMode ? 'bg-slate-700 border-slate-600' : ''}`} type="number" value={v.valor} placeholder={`Ingreso ${k}`} onChange={(e) => handleIngresoChange(k, "valor", e.target.value)} />
@@ -331,7 +331,7 @@ export default function FinanzasPersonales() {
             <AccordionTriggerWrapper value="gastos-fijos" className={`${darkMode ? 'hover:bg-slate-800' : ''}`}>Gastos Fijos — {percent(totalGastosFijos)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="gastos-fijos">
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 max-h-96 overflow-y-auto">
                   {Object.entries(gastosFijos).map(([k, v]) => (
                     <div key={k} className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-sm">
                       <span className="col-span-2">{k} (${v.presupuesto.toLocaleString()})</span>
@@ -348,7 +348,7 @@ export default function FinanzasPersonales() {
             <AccordionTriggerWrapper value="no-guilt-spend" className={`${darkMode ? 'hover:bg-slate-800' : ''}`}>No Guilt Spend — {percent(totalNoGuilt)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="no-guilt-spend">
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 max-h-96 overflow-y-auto">
                   {Object.entries(noGuiltSpend).map(([k, v]) => (
                     <div key={k} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-sm">
                         <Input className={`w-full sm:flex-1 ${darkMode ? 'bg-slate-700 border-slate-600' : ''}`} defaultValue={k} placeholder="Item" onBlur={(e) => renameNoGuiltKey(k, e.target.value.trim())} />
@@ -369,7 +369,7 @@ export default function FinanzasPersonales() {
             <AccordionTriggerWrapper value="inversion" className={`${darkMode ? 'hover:bg-slate-800' : ''}`}>Inversión — F: {percent(totalInvFijo)}% | V: {percentVar(totalInvVar)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="inversion">
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                   {Object.entries(inversion).map(([k, x]) => (
                     <div key={k} className={`space-y-2 py-3 px-4 rounded-lg shadow-sm border-b last:border-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-sky-50'}`}>
                       <div className="flex justify-between items-center gap-2">
@@ -401,7 +401,7 @@ export default function FinanzasPersonales() {
             <AccordionTriggerWrapper value="ahorro" className={`${darkMode ? 'hover:bg-slate-800' : ''}`}>Ahorro — F: {percent(totalAhrFijo)}% | V: {percentVar(totalAhrVar)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="ahorro">
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                   {Object.entries(ahorro).map(([k, x]) => (
                      <div key={k} className={`space-y-2 py-3 px-4 rounded-lg shadow-sm border-b last:border-0 ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-sky-50'}`}>
                       <div className="flex justify-between items-center gap-2">
@@ -433,7 +433,7 @@ export default function FinanzasPersonales() {
             <AccordionTriggerWrapper value="gastos-variables" className={`${darkMode ? 'hover:bg-slate-800' : ''}`}>Gastos Variables — {percent(totalGVarFijo)}%</AccordionTriggerWrapper>
             <AccordionContentWrapper value="gastos-variables">
               <Card className={`${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                   {Object.entries(gastosVariables).map(([catKey, catVal]) => {
                     const subTotal = calcSubTotal(catVal.subItems);
                     const restante = catVal.presupuesto - subTotal;
@@ -454,25 +454,25 @@ export default function FinanzasPersonales() {
                             {Object.entries(catVal.subItems).map(([subK, subX]) => (
                               <div key={subK} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                 <Input 
-                                    className={`w-full sm:flex-1 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} 
-                                    defaultValue={subK} 
-                                    onBlur={(e) => renameSubItem(catKey, subK, e.target.value.trim())} 
-                                    placeholder="Nombre del ítem"
+                                  className={`w-full sm:flex-1 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} 
+                                  defaultValue={subK} 
+                                  onBlur={(e) => renameSubItem(catKey, subK, e.target.value.trim())} 
+                                  placeholder="Nombre del ítem"
                                 />
                                 <div className="flex items-center gap-2">
-                                    <Input 
-                                        className={`flex-1 sm:w-32 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} 
-                                        type="number" 
-                                        value={subX.realFijo} 
-                                        placeholder="Monto" 
-                                        onChange={(e) => handleSubItemChange(catKey, subK, e.target.value)} 
-                                    />
-                                    <Button 
-                                        className="bg-transparent hover:bg-red-500/20 text-lg" 
-                                        onClick={() => deleteSubItem(catKey, subK)}
-                                    >
-                                        🗑️
-                                    </Button>
+                                  <Input 
+                                    className={`flex-1 sm:w-32 ${darkMode ? 'bg-slate-600 border-slate-500' : 'bg-white'}`} 
+                                    type="number" 
+                                    value={subX.realFijo} 
+                                    placeholder="Monto" 
+                                    onChange={(e) => handleSubItemChange(catKey, subK, e.target.value)} 
+                                  />
+                                  <Button 
+                                    className="bg-transparent hover:bg-red-500/20 text-lg" 
+                                    onClick={() => deleteSubItem(catKey, subK)}
+                                  >
+                                    🗑️
+                                  </Button>
                                 </div>
                               </div>
                             ))}
