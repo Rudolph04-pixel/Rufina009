@@ -108,12 +108,13 @@ function FinanzasPersonales() {
  });
 
  const [gastosFijos, setGastosFijos] = useState({
-    'Hipoteca o Arriendo': { presupuesto: 700000, real: "" },
+    'Hipoteca': { presupuesto: 700000, real: "" },
     'Gastos comunes': { presupuesto: 130000, real: "" },
     'Luz': { presupuesto: 21000, real: "" },
-    'Agua': { presupuesto: 10000, real: "" },
-    'Gas': { presupuesto: 20000, real: "" },
-    'Celular': { presupuesto: 11000, real: "" },
+    'Agua': { presupuesto: 11000, real: "" },
+    'Bidón de Agua': { presupuesto: 10000, real: "" },
+    'Gas': { presupuesto: 21000, real: "" },
+    'Celular': { presupuesto: 12990, real: "" },
     'Internet': { presupuesto: 18000, real: "" },
     'Seguro de Salud': { presupuesto: 18000, real: "" },
     'Seguro de Hogar': { presupuesto: 6000, real: "" },
@@ -122,6 +123,7 @@ function FinanzasPersonales() {
     'Abu': { presupuesto: 30000, real: "" },
     'Itau': { presupuesto: 11000, real: "" },
     'Jardin': { presupuesto: 11000, real: "" },
+    'Corte pelo': { presupuesto: 10000, real: "" },
  });
 
  const [guiltFreeSpend, setGuiltFreeSpend] = useState({
@@ -146,13 +148,13 @@ function FinanzasPersonales() {
 
  const [gastosVariables, setGastosVariables] = useState({
     "Alimentación & Salud": {
-      presupuesto: 135000,
+      presupuesto: 200000,
       subItems: {
         'Supermercado Lider': { realFijo: "120000" },
         'Verdulería': { realFijo: "35000" }
       }
     },
-    'Transporte': { presupuesto: 80000, subItems: { 'Bencina': {realFijo: '60000'}} },
+    'Transporte': { presupuesto: 90000, subItems: { 'Bencina': {realFijo: '60000'}} },
     'TAG': { presupuesto: 25000, subItems: {} }
  });
 
